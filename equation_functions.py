@@ -58,7 +58,7 @@ def runge_kutta(t0, N0, desired_t, h, k, p_f, s_a, s_i, l, r_r, S0, m, n_s):
         if abs(t - desired_t) < 0.01:
             break
 
-        # Optionally, you can print or store the values of t and N
+        # Optionally, you can print or store the values of t and N_t
         #print(f"t = {t}, N_t = {N_t}")
 
     # Plotting
