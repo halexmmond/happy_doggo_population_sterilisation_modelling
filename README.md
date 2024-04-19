@@ -18,5 +18,5 @@ S0 = 0            # Initial number of sterilised dogs
 m = 0             # Net migration rate (positive into environment, negative out) (0-1)
 n_s = 250         # Number of sterilisations taking place each month
 
-# N_t             # Total population at time t
-# S_t             # Number of sterilised dogs at time t
+N_t               # Total population at time t
+S_t               # Number of sterilised dogs at time t
