@@ -15,8 +15,9 @@ r_r = 2/12        # Average number of litters (monthly)
 S0 = 0            # Initial number of sterilised dogs
 m = 0             # Net migration rate (positive into environment, negative out)
 n_s = 250         # Number of sterilisations taking place each month
-# N               # Population at time t
+# N_t             # Population at time t
 # S_t             # Number of sterilised dogs at time t
+
 # add more here for sterilisation proportion when new code is added
 
 runge_kutta(t0=t0, N0=N0, desired_t=desired_t, h=h, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, S0=S0, m=m, n_s=n_s)
