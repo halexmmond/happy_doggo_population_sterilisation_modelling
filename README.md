@@ -4,9 +4,9 @@ Here are the variables I currently have as inputs for modelling either the total
 All rates are in months and here are some examples.
 
 # Choose values for equations to test plotting and estimation
-t0 = 0            # Initial time
-N0 = 2000         # Initial total population
-desired_t = 18    # Time over which to model (in months)
+t0 = 0            # Initial time  
+N0 = 2000         # Initial total population  
+desired_t = 18    # Time over which to model (in months)  
 h = 1             # Step size for Runge Kutta method (1 recommended)
 k = 10000         # Carrying capacity of environment
 p_f = 0.5         # Proportion of population that are female (0-1)
