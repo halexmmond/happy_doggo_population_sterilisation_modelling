@@ -1,10 +1,10 @@
-<pre>
 Yo yo yo herbernd.
 
 Here are the variables I currently have as inputs for modelling either the total population at time t, or the number of sterilised dogs at time t.
 All rates are in months and here are some examples.
 
 # Choose values for equations to test plotting and estimation
+<pre>
 t0 = 0            # Initial time  
 N0 = 2000         # Initial total population  
 desired_t = 18    # Time over which to model (in months)  
