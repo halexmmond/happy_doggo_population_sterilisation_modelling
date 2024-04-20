@@ -45,6 +45,8 @@ def runge_kutta(t0, N0, desired_t, h, k, p_f, s_a, s_i, l, r_r, S0, m, n_s):
 
         # Update S(t)
         S_t = (n_s + ((m + s_a - 1) * S0)) * t
+        if S_t > N_t:
+            S_t = N_t
 
         # Update S(t)/N(t)
 
@@ -78,8 +80,8 @@ def runge_kutta(t0, N0, desired_t, h, k, p_f, s_a, s_i, l, r_r, S0, m, n_s):
     plt.figure(figsize=(10, 6))
     plt.plot(t_values, S_N_values, label='Sterilised Dogs', marker='x')
     plt.xlabel('t')
-    plt.ylabel('S(t)/N(t)')
-    plt.title('Approximation of S(t)/N(t) using Fourth Order Runge-Kutta Method')
+    plt.ylabel('Percentage of population sterilised')
+    plt.title('Approximation of percentage of population sterilised using Fourth Order Runge-Kutta Method')
     plt.axhline(0, color='black', linewidth=0.5)
     plt.axvline(0, color='black', linewidth=0.5)
     plt.grid(True)
