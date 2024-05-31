@@ -161,7 +161,7 @@ def growth_binary_search_n_s(t0, N0, desired_t, h, k, p_f, s_a, s_i, l, r_r, S0,
 # Add intervention
 # This function will allow the user to add an intervention i.e. sterilising a certain number of dogs
 # per month
-def add_intervention(current_df, N0, h, k, p_f, s_a, s_i, l, r_r, S0, m):
+def add_intervention(current_df, N0, h, k, p_f, s_a, s_i, l, r_r, S0, m, model_length):
     # All that happens in this function is that the dataframe gets changed so that it includes
     # added interventions
     while True:
@@ -184,14 +184,29 @@ def add_intervention(current_df, N0, h, k, p_f, s_a, s_i, l, r_r, S0, m):
             end_month = start_month + duration
             sterilisation_rate = int(input("How many sterilisations per month will be taking place?: "))
 
-            # Calculate population for each month of intervention
-            intervention_data = runge_kutta(t0=start_month, N0, desired_t=duration, h, k, p_f, s_a, s_i, l, r_r, S0, m, n_s=sterilisation_rate)[5]
-
             # Create a copy of current dataframe to modify
             intervention_df = current_df.copy()
 
+            # Calculate population for each month of intervention
+            intervention_data = runge_kutta(t0=start_month, N0, desired_t=duration, h, k, p_f, s_a, s_i, l, r_r, S0, m, n_s=sterilisation_rate)[5]
 
-            break
+            # Isolate sterilisation rates
+            intervention_sterilisation_rates = intervention_data.iloc[:, 1]
+
+            # Replace intervention timeframe with intervention data
+            intervention_df["Sterilisation Rate"][start_month:start_month+duration+1] = intervention_sterilisation_rates
+
+            # Calculate population for each month post intervention
+            post_intervention_data = runge_kutta(t0=start_month+duration+1, N0=new_value, desired_t=model_length-start_month-duration-1,
+                                                 h, k, p_f, s_a, s_i, l, r_r, S0, m, n_s=sterilisation_rate)[5]
+
+            post_intervention_sr = post_intervention_data.iloc[:, 1]
+
+            # Replace post-intervention timeframe with post-intervention data
+            intervention_df["Sterilisation Rate"][start_month+duration+1:model_length] = post_intervention_sr
+
+            return intervention_df
+
         elif intervention_type == "2":
             # Get the inputs and run the function for 2
             break

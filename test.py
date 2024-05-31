@@ -2,21 +2,30 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 t = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-S_N = [0.5, 0.6, 0.8, 0.9, 0.7, 0.4, 0.2, 0.3, 0.5]
+S_N = [0.5, 0.6, 0.8, 0.8, 0.7, 0.4, 0.2, 0.3, 0.5]
 
 df = pd.DataFrame()
 df["Month"] = t
 df["SR"] = S_N
 
-print(df)
+df_sr = pd.DataFrame()
+df_sr["Month"] = [2, 3, 4, 5]
+df_sr["SR"] = [0.9, 0.9, 0.9, 0.9]
 
-# Show sterilisation proportion
-plt.figure(figsize=(10, 6))
-plt.plot(df["Month"], df["SR"], marker='x')
-plt.xlabel('t')
-plt.ylabel('SR')
-plt.axhline(0, color='black', linewidth=0.5)
-plt.axvline(0, color='black', linewidth=0.5)
-plt.grid(True)
-plt.legend()
-plt.show()
+start_month = 2
+duration = 3
+
+print(df)
+print(df_sr)
+
+# Create a copy of current dataframe to modify
+intervention_df = df.copy()
+
+# Isolate sterilisation rates
+intervention_sterilisation_rates = df_sr.iloc[:, 1]
+
+print(intervention_sterilisation_rates)
+
+intervention_df["SR"][start_month:start_month+duration+1] = intervention_sterilisation_rates
+
+print(intervention_df)
