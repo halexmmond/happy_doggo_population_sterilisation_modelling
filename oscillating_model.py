@@ -181,12 +181,6 @@ def growth_binary_search_t(t0, N0, desired_n_s, h, k, p_f, s_a, s_i, l, r_r, S0,
     return t + 1
 
 
-# Intervention 1 - known timeframe, target sterilisation proportion and sterilisation rate
-
-# Intervention 2 - known timeframe and target sterilisation proportion, unknown sterilisation rate
-
-# Intervention 3 - known target sterilisation proportion and sterilisation rate, unknown timeframe
-
 # Add intervention
 # This function will allow the user to add an intervention i.e. sterilising a certain number of dogs
 # per month
@@ -331,5 +325,21 @@ upper_S_N = 0.8        # Upper limit for sterilisation rate we want to reach wit
 # Test model
 graph_runge_kutta(t0=t0, N0=N0, desired_t=desired_t, h=h, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, S0=initial_S_N*N0, m=m, n_s=n_s, lower_S_N=lower_S_N, upper_S_N=upper_S_N)
 
-# Find point in time at which y=0.5
-# Want to find point in time at which
+
+
+
+# NEW MAIN CODE
+
+# Create empty lists in which we'll store dfs
+model_iterations = []
+
+# First we want to use inputs to create initial model with data stored in df
+# Calculate model here and add dataframe to list
+# Plot model
+
+# On click of add_intervention
+# Run function which spits out a new dataframe and add to list
+# Plot last model in list
+
+# On click of go_back
+# Remove last dataframe from list and plot new last df in list
