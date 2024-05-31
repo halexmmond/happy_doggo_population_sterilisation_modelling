@@ -31,7 +31,7 @@ def num_sterilised_dogs(initial_S_N, N0, s_a, m, n_s, t):
 def dNdt(initial_S_N, N0, N_t, k, p_f, s_a, s_i, l, r_r, n_s, t, m):
     S0 = N0 * initial_S_N
     dN_dt = (N_t * ((k - N_t) / k) * (
-            (p_f * s_a * s_i * l * r_r * (1 - ((((n_s + ((m + s_a - 1) * S0)) * t) + S0) / N_t))) - (1 - s_a) + m))
+            (p_f * s_a * s_i * l * (r_r/12) * (1 - ((((n_s + ((m + s_a - 1) * S0)) * t) + S0) / N_t))) - (1 - s_a) + m))
     return dN_dt
 
 
@@ -387,18 +387,42 @@ p_f = 0.5              # Proportion of population that are female (0-1)
 s_a = 0.99             # Adult survivability rate (0-1)
 s_i = 0.4              # Infant survivability rate (0-1)
 l = 6                  # Reproduction rate/average litter size
-r_r = 2/12             # Average number of litters (monthly)
-#S0 = 2000              # Initial number of sterilised dogs
+r_r = 2                # Average number of litters (yearly)
 m = 0                  # Net migration rate (positive into environment, negative out) (0-1)
 n_s = 0                # Number of sterilisations taking place each month
 desired_S_N = 0.8      # Desired sterilisation proportion
 lower_S_N = 0.5        # Lower limit for sterilisation rate at which intervention is needed
 upper_S_N = 0.8        # Upper limit for sterilisation rate we want to reach with intervention
-# N_t                  # Population at time t
-# S_t                  # Number of sterilised dogs at time t
+
+
+# Create a dictionary to keep arguments/parameters of model in
+initial_parameters = {
+    "t0": 0,
+    "N0": None,
+    "initial_S_N": None,
+    "desired_S_N": None,
+    "lower_S_N": None,
+    "upper_S_N": None
+    "n_s": 0,
+    "desired_t": None,
+    "h": 1,
+    "k": 100000,
+    "p_f": None,
+    "s_a": 1,
+    "s_i": 0.4,
+    "l": None,
+    "r_r": 2,
+    "m": 0
+}
+
+# I'm thinking we could also add a dictionary to keep track of intervention parameters so that we can
+# give the dictionary as a set of parameters to the function instead of having multiple parameters to pass.
+# We won't need to store previous intervention parameters because once we have the dataframe data that's all
+# we need and all we'll need to delete.
+
 
 # Test model
-graph_runge_kutta(t0=t0, N0=N0, desired_t=desired_t, h=h, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, S0=initial_S_N*N0, m=m, n_s=n_s, lower_S_N=lower_S_N, upper_S_N=upper_S_N)
+graph_runge_kutta(t0=t0, N0=N0, initial_S_N=initial_S_N, desired_t=desired_t, h=h, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, m=m, n_s=n_s, lower_S_N=lower_S_N, upper_S_N=upper_S_N)
 
 
 
@@ -409,6 +433,21 @@ graph_runge_kutta(t0=t0, N0=N0, desired_t=desired_t, h=h, k=k, p_f=p_f, s_a=s_a,
 model_iterations = []
 
 # First we want to use inputs to create initial model with data stored in df
+# Find initial conditions of model
+parameters["N0"] = int(input("What is the initial total number of dogs in the population?: ").strip())
+parameters["initial_S_N"] = int(input("What is the initial sterilisation proportion as a decimal? (e.g. 0.4 for 40% of "
+                                      "population sterilised): ").strip())
+parameters["n_s"] = int(input("How many sterilisations per month are currently taking place? (If none, enter 0): ").strip())
+parameters["desired_t"] = int(input("How many months would you like to model over?: ").strip())
+parameters["k"] = int(input("What is the carrying capacity of the environment? (If unknown, enter 100000): ").strip())
+parameters["p_f"] = int(input("What proportion of the population are female (as a decimal)?: ").strip())
+parameters["s_i"] = int(input("What is the infant survivability rate (as a decimal)?: ").strip())
+parameters["l"] = int(input("What is the average litter size for this area?: ").strip())
+parameters["r_r"] = int(input("On average, how many litters per year will a female dog have?: ").strip())
+parameters["m"] = int(input("What is the net proportion of dogs (from whole population) that migrate into the area? "
+                            "(Please note that if the net migration is out of the community, you'll need to enter a minus"
+                            "sign in front of the value): "))
+
 # Calculate model here and add dataframe to list
 # Plot model
 

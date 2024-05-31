@@ -29,3 +29,22 @@ print(intervention_sterilisation_rates)
 intervention_df["SR"][start_month:start_month+duration+1] = intervention_sterilisation_rates
 
 print(intervention_df)
+
+
+params = {
+    "t0": None
+}
+
+print(params)
+
+print(params.get("t0"))
+
+params["t0"] = 5
+
+print(params.get("t0"))
+
+
+
+# Find initial conditions of model
+print(int(input("What is the initial total number of dogs in the population?: ").strip()))
+
