@@ -15,7 +15,7 @@ def num_sterilised_dogs(S0, s_a, m, n_s, t):
 # Total population of stray dogs as a differential equation
 def dNdt(N_t, k, p_f, s_a, s_i, l, r_r, S0, n_s, t, m):
     dN_dt = (N_t * ((k - N_t) / k) * (
-            (p_f * s_a * s_i * l * r_r * (1 - (((n_s + ((m + s_a - 1) * S0)) * t) / N_t))) - (1 - s_a) + m))
+            (p_f * s_a * s_i * l * r_r * (1 - ((((n_s + ((m + s_a - 1) * S0)) * t) + S0) / N_t))) - (1 - s_a) + m))
     return dN_dt
 
 
@@ -45,8 +45,8 @@ def runge_kutta(t0, N0, desired_t, h, k, p_f, s_a, s_i, l, r_r, S0, m, n_s):
         # Update N using weighted average of k's
         N_t = N_t + (k1 + 2 * k2 + 2 * k3 + k4) / 6
 
-        #if N_t < 0:
-        #    N_t = 0
+        if N_t < 0:
+            N_t = 0.1
 
         # Update t
         t = t + h
@@ -131,7 +131,7 @@ def growth_binary_search_n_s(t0, N0, desired_t, h, k, p_f, s_a, s_i, l, r_r, S0,
         # Calculate S(t) and N(t) at desired time using chosen n_s
         S_t = ((n_s + ((m + s_a - 1) * S0)) * desired_t) + S0
 
-        N_t = runge_kutta(t0=t0, N0=N0, desired_t=desired_t, h=h, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, S0=S0, m=m, n_s=n_s)
+        N_t = runge_kutta(t0=t0, N0=N0, desired_t=desired_t, h=h, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, S0=S0, m=m, n_s=n_s)[0]
         if N_t < 0:
             N_t = 1
 
@@ -153,12 +153,12 @@ def dSNdt(t0, N0, desired_t, h, k, p_f, s_a, s_i, l, r_r, S0, m, n_s):
     dS_dt = n_s + ((m + s_a - 1) * S0)
 
     N_t = runge_kutta(t0=t0, N0=N0, desired_t=desired_t, h=h, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, S0=S0, m=m,
-                      n_s=n_s)
+                      n_s=n_s)[0]
 
     dN_dt = (N_t * ((k - N_t) / k) * (
                 (p_f * s_a * s_i * l * r_r * (1 - (((n_s + ((m + s_a - 1) * S0)) * desired_t) / N_t))) - (1 - s_a) + m))
 
-    dSN_dt = ((N_t * dS_dt) - (S_t * dN_dt)) / N_t ** 2
+    dSN_dt = ((N_t * dS_dt) - (S_t * dN_dt)) / (N_t ** 2)
 
     return dSN_dt
 
@@ -170,12 +170,11 @@ def maintenance_binary_search_n_s(t0, N0, desired_t, h, k, p_f, s_a, s_i, l, r_r
 
     while upper_limit - lower_limit > 1:
         # Try n_s at the midrange point
-        n_s = math.ceil((upper_limit + lower_limit) / 1.5)
+        n_s = math.ceil((upper_limit + lower_limit) / 2)
 
         # Calculate the derivative of S(t)/N(t) across the desired timeframe
         dSN_dt = dSNdt(t0=t0, N0=N0, desired_t=desired_t, h=h, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, S0=S0, m=m,
                        n_s=n_s)
-        print(dSN_dt)
 
         if dSN_dt < 0:
             lower_limit = n_s
