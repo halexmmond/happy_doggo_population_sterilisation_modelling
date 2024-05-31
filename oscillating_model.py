@@ -89,6 +89,10 @@ def runge_kutta(t0, N0, desired_t, h, k, p_f, s_a, s_i, l, r_r, S0, m, n_s):
         sterilisation_rate_data = pd.DataFrame()
         sterilisation_rate_data["Month"] = t_values
         sterilisation_rate_data["Sterilisation Rate"] = S_N_values
+        population_data = pd.DataFrame()
+        population_data["Month"] = t_values
+        population_data["Total Population"] = N_t_values
+        population_data["Sterilised Population"] = S_t_values
 
         # Check if t is close enough to desired_t
         if abs(t - desired_t) < 0.01:
@@ -97,7 +101,7 @@ def runge_kutta(t0, N0, desired_t, h, k, p_f, s_a, s_i, l, r_r, S0, m, n_s):
         # Optionally, you can print or store the values of t and N_t
         # print(f"t = {t}, N_t = {N_t}")
 
-    return math.ceil(N_t), t_values, N_t_values, S_t_values, S_N_values, sterilisation_rate_data
+    return math.ceil(N_t), t_values, N_t_values, S_t_values, S_N_values, sterilisation_rate_data, population_data
 
 
 # This function uses the Runge-Kutta method to plot the population and sterilisation growth on a graph
@@ -110,14 +114,27 @@ def graph_runge_kutta(t0, N0, desired_t, h, k, p_f, s_a, s_i, l, r_r, S0, m, n_s
 
     # Show sterilisation proportion
     plt.figure(figsize=(10, 6))
-    plt.plot(sterilisation_rate_data["Month"], sterilisation_rate_data["Sterilisation Rate"], label='Sterilised Dogs', marker='x')
-    plt.xlabel('t')
-    plt.ylabel('Percentage of population sterilised')
-    plt.title('Approximation of percentage of population sterilised using Fourth Order Runge-Kutta Method')
+    plt.plot(sterilisation_rate_data["Month"], sterilisation_rate_data["Sterilisation Rate"], label='', marker='x')
+    plt.xlabel('Month')
+    plt.ylabel('Sterilisation Proportion')
+    plt.title('Approximation sterilisation proportion using Fourth Order Runge-Kutta Method')
     plt.axhline(0, color='black', linewidth=0.5)
     plt.axvline(0, color='black', linewidth=0.5)
     plt.axhline(lower_S_N, color='red', linestyle='dotted')
     plt.axhline(upper_S_N, color='red', linestyle='dotted')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
+    # Show dog population with sterilised dogs
+    plt.figure(figsize=(10, 6))
+    plt.plot(sterilisation_rate_data["Month"], sterilisation_rate_data["Total Population"], label='Total Population', marker='x')
+    plt.plot(sterilisation_rate_data["Month"], sterilisation_rate_data["Sterilised Population"], label='Sterilised Population', marker='x')
+    plt.xlabel('Month')
+    plt.ylabel('Number of Dogs')
+    plt.title('Approximation of Total Population and Sterilised Population using Fourth Order Runge-Kutta Method')
+    plt.axhline(0, color='black', linewidth=0.5)
+    plt.axvline(0, color='black', linewidth=0.5)
     plt.grid(True)
     plt.legend()
     plt.show()
