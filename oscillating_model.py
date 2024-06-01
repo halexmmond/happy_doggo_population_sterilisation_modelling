@@ -28,39 +28,49 @@ def num_sterilised_dogs(initial_S_N, N0, s_a, m, n_s, t):
 
 
 # Total population of stray dogs as a differential equation
-def dNdt(initial_S_N, N0, N_t, k, p_f, s_a, s_i, l, r_r, n_s, t, m):
-    S0 = N0 * initial_S_N
+def dNdt(initial_S_N, N_t, k, p_f, s_a, s_i, l, r_r, n_s, t, m):
+    S0 = N_t * initial_S_N
     dN_dt = (N_t * ((k - N_t) / k) * (
             (p_f * s_a * s_i * l * (r_r/12) * (1 - ((((n_s + ((m + s_a - 1) * S0)) * t) + S0) / N_t))) - (1 - s_a) + m))
     return dN_dt
 
 
 # Runge Kutta method of solving the differential equation
-def runge_kutta(t0, N0, initial_S_N, desired_t, h, k, p_f, s_a, s_i, l, r_r, m, n_s):
-    # Initialize variables
-    t = t0  # initial time
-    N_t = N0  # initial value of N
-    h = h  # chosen step size
-    desired_t = desired_t  # target time
-    S0 = N0 * initial_S_N
+def runge_kutta(**kwargs):
+    # Initialize variables from dictionary
+    t = kwargs.get("t0")  # initial time
+    N_t = kwargs.get("N0")  # initial value of N
+    initial_S_N = kwargs.get("initial_S_N")
+    n_s = kwargs.get("n_s")
+    desired_t = kwargs.get("desired_t")  # target
+    h = kwargs.get("h")  # chosen step size
+    k = kwargs.get("k")
+    p_f = kwargs.get("p_f")
+    s_a = kwargs.get("s_a")
+    s_i = kwargs.get("s_i")
+    l = kwargs.get("l")
+    r_r = kwargs.get("r_r")
+    m = kwargs.get("m")
 
-    t_values = [t0]
-    N_t_values = [N0]
+    S0 = N_t * initial_S_N # N_t here will be N0
+
+    t_values = [t]
+    N_t_values = [N_t]
     S_t_values = [S0]
-    S_N_values = [(S0 / N0)]
+    S_N_values = [(S0 / N_t)]
 
     # Iterate using fourth order Runge-Kutta
     while t < desired_t+1:
         # Calculate k1, k2, k3, k4
-        k1 = h * dNdt(t=t, N_t=N_t, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, S0=S0, m=m, n_s=n_s)
-        k2 = h * dNdt(t=t + 0.5 * h, N_t=N_t + 0.5 * k1, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, S0=S0, m=m,
-                      n_s=n_s)
-        k3 = h * dNdt(t=t + 0.5 * h, N_t=N_t + 0.5 * k2, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, S0=S0, m=m,
-                      n_s=n_s)
-        k4 = h * dNdt(t=t + h, N_t=N_t + k3, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, S0=S0, m=m, n_s=n_s)
+        k1 = h * dNdt(t=t, initial_S_N=initial_S_N, N_t=N_t, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, m=m, n_s=n_s)
+        k2 = h * dNdt(t=t + 0.5 * h, initial_S_N=initial_S_N, N_t=N_t + 0.5 * k1, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, m=m, n_s=n_s)
+        k3 = h * dNdt(t=t + 0.5 * h, initial_S_N=initial_S_N, N_t=N_t + 0.5 * k2, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, m=m, n_s=n_s)
+        k4 = h * dNdt(t=t + h, initial_S_N=initial_S_N, N_t=N_t + k3, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, m=m, n_s=n_s)
 
         # Update N using weighted average of k's
         N_t = N_t + (k1 + 2 * k2 + 2 * k3 + k4) / 6
+
+        # Update N_t in dictionary
 
         if N_t < 0:
             N_t = 0.1
@@ -74,7 +84,7 @@ def runge_kutta(t0, N0, initial_S_N, desired_t, h, k, p_f, s_a, s_i, l, r_r, m, 
         if S_t > N_t:
             S_t = N_t
 
-        #if S_t < 0:
+            #if S_t < 0:
         #    S_t = 0
 
         # Update S(t)/N(t)
@@ -122,8 +132,8 @@ def graph_runge_kutta(df_sterilisation_prop, df_population):
     plt.title('Approximation sterilisation proportion using Fourth Order Runge-Kutta Method')
     plt.axhline(0, color='black', linewidth=0.5)
     plt.axvline(0, color='black', linewidth=0.5)
-    plt.axhline(lower_S_N, color='red', linestyle='dotted')
-    plt.axhline(upper_S_N, color='red', linestyle='dotted')
+    #plt.axhline(lower_S_N, color='red', linestyle='dotted')
+    #plt.axhline(upper_S_N, color='red', linestyle='dotted')
     plt.grid(True)
     plt.legend()
     plt.show()
@@ -144,7 +154,22 @@ def graph_runge_kutta(df_sterilisation_prop, df_population):
 
 # This equation calculates the number of sterilisations required per month to reach a target sterilisation proportion
 # within a specified timeframe using binary search
-def growth_binary_search_n_s(t0, N0, initial_S_N, desired_t, h, k, p_f, s_a, s_i, l, r_r, m, desired_S_N):
+def growth_binary_search_n_s(**kwargs):
+    # Initialize variables from dictionary
+    t0 = kwargs.get("t0")  # initial time
+    N0 = kwargs.get("N0")  # initial value of N
+    initial_S_N = kwargs.get("initial_S_N")
+    desired_S_N = kwargs.get("desired_S_N")
+    n_s = kwargs.get("n_s")
+    desired_t = kwargs.get("desired_t")  # target
+    h = kwargs.get("h")  # chosen step size
+    k = kwargs.get("k")
+    p_f = kwargs.get("p_f")
+    s_a = kwargs.get("s_a")
+    s_i = kwargs.get("s_i")
+    l = kwargs.get("l")
+    r_r = kwargs.get("r_r")
+    m = kwargs.get("m")
 
     lower_limit = 0
     upper_limit = 2000
@@ -176,6 +201,7 @@ def growth_binary_search_n_s(t0, N0, initial_S_N, desired_t, h, k, p_f, s_a, s_i
 # This equation calculates the number of months required of a provided number of sterilisation
 # per month to reach a target sterilisation proportion using binary search
 def growth_binary_search_t(t0, N0, initial_S_N, desired_n_s, h, k, p_f, s_a, s_i, l, r_r, m, desired_S_N):
+    # Note that I haven't changed anything in here to use the dictionaries and kwargs
 
     lower_limit = 0
     upper_limit = 2000
@@ -207,7 +233,7 @@ def growth_binary_search_t(t0, N0, initial_S_N, desired_n_s, h, k, p_f, s_a, s_i
 # Add intervention
 # This function will allow the user to add an intervention i.e. sterilising a certain number of dogs
 # per month
-def add_intervention(current_df_sp, current_df_pop, N0, initial_S_N, h, k, p_f, s_a, s_i, l, r_r, m, model_length, initial_n_s):
+def add_intervention(current_df_sp, current_df_pop, **kwargs):
     # All that happens in this function is that the dataframe gets changed so that it includes
     # added interventions
     while True:
@@ -215,157 +241,168 @@ def add_intervention(current_df_sp, current_df_pop, N0, initial_S_N, h, k, p_f, 
         intervention_type = input("Which of the following describes your situation?\n"
                                   "1. I know the timeframe and monthly sterilisation rate and want to add this to the model.\n"
                                   "2. I know the timeframe and target sterilisation proportion, but I want to calculate "
-                                  "the required monthly sterilisation rate to reach the target proportion and add this to the model.\n"
-                                  "3. I know the target sterilisation proportion and the monthly sterilisation rate, but "
-                                  "I want to calculate the timeframe to reach the target proportion and add this to the model.\n\n"
-                                  "Please enter 1, 2 or 3 without any spaces and press ENTER: ")
-        # Strip whitespace
-        intervention_type = intervention_type.strip()
+                                  "the required monthly sterilisation rate to reach the target proportion and add this to the model.\n").strip()
 
         if intervention_type == "1": # Have all required data and just want to plot
             # Get the inputs and run the function for 1
-            start_month = int(input("Which month do you want to start the intervention?: "))
-            duration = int(input("How many months would you like this intervention to run?: "))
-            monthly_sterilisations = int(input("How many sterilisations per month will be taking place?: "))
-            # Could have these inputs as arguments to the add_intervention function
+
+            # Intervention parameter assignment
+            start_month = int(input("Which month do you want to start the intervention?: ").strip())
+            intervention_parameters["N0"] = current_df_pop["Total Population"].iloc[intervention_parameters.get("t0")]
+            intervention_parameters["initial_S_N"] = current_df_sp["Sterilisation Proportion"].iloc[intervention_parameters.get("t0")]
+            intervention_parameters["lower_S_N"] = float(input("Please enter a value for the lower sterilisation proportion"
+                                                             "limit as a decimal, which will be shown on the graph as a dotted line").strip())
+            intervention_parameters["upper_S_N"] = float(input("Please enter a value for the upper sterilisation proportion"
+                                                             "limit as a decimal, which will be shown on the graph as a dotted line").strip())
+            intervention_parameters["n_s"] = int(input("How many sterilisations per month will be taking place?: ").strip())
+            intervention_parameters["desired_t"] = int(input("How many months would you like this intervention to run?: ").strip())
+            intervention_parameters["k"] = kwargs.get("k")
+            intervention_parameters["p_f"] = kwargs.get("p_f")
+            intervention_parameters["s_a"] = kwargs.get("s_a")
+            intervention_parameters["s_i"] = kwargs.get("s_i")
+            intervention_parameters["l"] = kwargs.get("l")
+            intervention_parameters["r_r"] = kwargs.get("r_r")
+            intervention_parameters["m"] = kwargs.get("m")
+
 
             # Create a copy of current dataframe to modify
             intervention_df_sp = current_df_sp.copy()
             intervention_df_pop = current_df_pop.copy()
 
             # Calculate population for each month of intervention
-            intervention_data_sp = runge_kutta(t0=0, N0, initial_S_N, desired_t=duration, h, k, p_f, s_a, s_i, l, r_r, m, n_s=monthly_sterilisations)[5]
-            intervention_data_pop = runge_kutta(t0=0, N0, initial_S_N, desired_t=duration, h, k, p_f, s_a, s_i, l, r_r, m, n_s=monthly_sterilisations)[6]
+            intervention_data_sp = runge_kutta(**intervention_parameters)[5]
+            intervention_data_pop = runge_kutta(**intervention_parameters)[6]
 
             # Isolate sterilisation props and population data
             intervention_sterilisation_props = intervention_data_sp.iloc[:, 1]
             intervention_population_total = intervention_data_pop.iloc[:, 1]
-            intervention_population_sterilised = intervention_data_pop[:, 2]
+            intervention_population_sterilised = intervention_data_pop.iloc[:, 2]
 
             # Replace intervention timeframe with intervention data
-            intervention_df_sp["Sterilisation Proportion"][start_month:start_month+duration+1] = intervention_sterilisation_props
-            intervention_df_pop["Total Population"][start_month:start_month+duration+1] = intervention_population_total
-            intervention_df_pop["Sterilised Population"][start_month:start_month+duration+1] = intervention_population_sterilised
+            intervention_df_sp["Sterilisation Proportion"][start_month:start_month+intervention_parameters.get("desired_t")
+                                                                       +1] = intervention_sterilisation_props
+            intervention_df_pop["Total Population"][start_month:start_month+intervention_parameters.get("desired_t")
+                                                                +1] = intervention_population_total
+            intervention_df_pop["Sterilised Population"][start_month:start_month+intervention_parameters.get("desired_t")
+                                                                     +1] = intervention_population_sterilised
 
+            # Set post intervention parameters using what we've calculated
+            post_intervention_parameters["N0"] = intervention_df_pop["Total Population"].iloc[start_month+intervention_parameters.get("desired_t")]
+            post_intervention_parameters["initial_S_N"] = intervention_df_sp["Sterilisation Proportion"].iloc[start_month+intervention_parameters.get("desired_t")]
+            post_intervention_parameters["lower_S_N"] = intervention_parameters.get("lower_S_N")
+            post_intervention_parameters["upper_S_N"] = intervention_parameters.get("upper_S_N")
+            post_intervention_parameters["n_s"] = kwargs.get("n_s")
+            post_intervention_parameters["desired_t"] = kwargs.get("desired_t")-start_month-intervention_parameters.get("desired_t")-1
+            post_intervention_parameters["k"] = kwargs.get("k")
+            post_intervention_parameters["p_f"] = kwargs.get("p_f")
+            post_intervention_parameters["s_a"] = kwargs.get("s_a")
+            post_intervention_parameters["s_i"] = kwargs.get("s_i")
+            post_intervention_parameters["l"] = kwargs.get("l")
+            post_intervention_parameters["r_r"] = kwargs.get("r_r")
+            post_intervention_parameters["m"] = kwargs.get("m")
 
             # Calculate population for each month post intervention
-            post_intervention_data_sp = runge_kutta(t0=0, N0=intervention_population_total[-1], initial_S_N, desired_t=model_length-start_month-duration-1,
-                                                 h, k, p_f, s_a, s_i, l, r_r, m, n_s=initial_n_s)[5]
-            post_intervention_data_pop = runge_kutta(t0=0, N0=intervention_population_total[-1], initial_S_N, desired_t=model_length-start_month-duration-1,
-                                                 h, k, p_f, s_a, s_i, l, r_r, m, n_s=initial_n_s)[6]
+            post_intervention_data_sp = runge_kutta(**post_intervention_parameters)[5]
+            post_intervention_data_pop = runge_kutta(**post_intervention_parameters)[6]
 
             post_intervention_sp = post_intervention_data_sp.iloc[:, 1]
             post_intervention_pop_total = post_intervention_data_pop.iloc[:, 1]
             post_intervention_pop_sterilised = post_intervention_data_pop.iloc[:, 2]
 
             # Replace post-intervention timeframe with post-intervention data
-            intervention_df_sp["Sterilisation Rate"][start_month+duration+1:model_length] = post_intervention_sp
-            intervention_df_pop["Total Population"][start_month+duration+1:model_length] = post_intervention_pop_total
-            intervention_df_pop["Sterilised Population"][start_month+duration+1:model_length] = post_intervention_pop_sterilised
+            intervention_df_sp["Sterilisation Proportion"][start_month+intervention_parameters.get("desired_t")
+                                                     +1:kwargs.get("desired_t")] = post_intervention_sp
+            intervention_df_pop["Total Population"][start_month+intervention_parameters.get("desired_t")
+                                                    +1:kwargs.get("desired_t")] = post_intervention_pop_total
+            intervention_df_pop["Sterilised Population"][start_month+intervention_parameters.get("desired_t")
+                                                         +1:kwargs.get("desired_t")] = post_intervention_pop_sterilised
 
             return intervention_df_sp, intervention_df_pop
 
         elif intervention_type == "2": # Have a target sterilisation and timeframe and need monthly sterilisation rate
             # Get the inputs and run the function for 2
-            start_month = int(input("Which month do you want to start the intervention?: "))
-            duration = int(input("How many months would you like this intervention to run?: "))
-            target_sterilisation_prop = int(input("What is your target sterilisation proportion?: "))
 
-            monthly_sterilisations = growth_binary_search_n_s(t0=0, N0, initial_S_N, desired_t=duration, h, k, p_f, s_a, s_i, l, r_r, m, desired_S_N=target_sterilisation_prop)
+            # Intervention parameter assignment
+            start_month = int(input("Which month do you want to start the intervention?: ").strip())
+            intervention_parameters["N0"] = current_df_pop["Total Population"].iloc[intervention_parameters.get("t0")]
+            intervention_parameters["initial_S_N"] = current_df_sp["Sterilisation Proportion"].iloc[
+                intervention_parameters.get("t0")]
+            intervention_parameters["desired_S_N"] = float(input("Please enter the target sterilisation proportion as a decimal: ").strip())
+            intervention_parameters["lower_S_N"] = float(
+                input("Please enter a value for the lower sterilisation proportion"
+                      "limit as a decimal, which will be shown on the graph as a dotted line").strip())
+            intervention_parameters["upper_S_N"] = float(
+                input("Please enter a value for the upper sterilisation proportion"
+                      "limit as a decimal, which will be shown on the graph as a dotted line").strip())
+            intervention_parameters["desired_t"] = int(
+                input("How many months would you like this intervention to run?: ").strip())
+            intervention_parameters["k"] = kwargs.get("k")
+            intervention_parameters["p_f"] = kwargs.get("p_f")
+            intervention_parameters["s_a"] = kwargs.get("s_a")
+            intervention_parameters["s_i"] = kwargs.get("s_i")
+            intervention_parameters["l"] = kwargs.get("l")
+            intervention_parameters["r_r"] = kwargs.get("r_r")
+            intervention_parameters["m"] = kwargs.get("m")
 
-            # Create a copy of current dataframe to modify
-            intervention_df_sp = current_df_sp.copy()
-            intervention_df_pop = current_df_pop.copy()
-
-            # Calculate population for each month of intervention
-            intervention_data_sp = \
-            runge_kutta(t0=0, N0, initial_S_N, desired_t=duration, h, k, p_f, s_a, s_i, l, r_r, m, n_s=monthly_sterilisations)[5]
-            intervention_data_pop = \
-            runge_kutta(t0=0, N0, initial_S_N, desired_t=duration, h, k, p_f, s_a, s_i, l, r_r, m, n_s=monthly_sterilisations)[6]
-
-            # Isolate sterilisation rates
-            intervention_sterilisation_props = intervention_data_sp.iloc[:, 1]
-            intervention_population_total = intervention_data_pop.iloc[:, 1]
-            intervention_population_sterilised = intervention_data_pop[:, 2]
-
-            # Replace intervention timeframe with intervention data
-            intervention_df_sp["Sterilisation Proportion"][
-            start_month:start_month + duration + 1] = intervention_sterilisation_props
-            intervention_df_pop["Total Population"][
-            start_month:start_month + duration + 1] = intervention_population_total
-            intervention_df_pop["Sterilised Population"][
-            start_month:start_month + duration + 1] = intervention_population_sterilised
-
-            # Calculate population for each month post intervention
-            post_intervention_data_sp = \
-            runge_kutta(t0=0, N0=intervention_population_total[-1], initial_S_N, desired_t=model_length - start_month - duration - 1,
-                        h, k, p_f, s_a, s_i, l, r_r, m, n_s=initial_n_s)[5]
-            post_intervention_data_pop = \
-            runge_kutta(t0=0, N0=intervention_population_total[-1], initial_S_N, desired_t=model_length - start_month - duration - 1,
-                        h, k, p_f, s_a, s_i, l, r_r, m, n_s=initial_n_s)[6]
-
-            post_intervention_sp = post_intervention_data_sp.iloc[:, 1]
-            post_intervention_pop_total = post_intervention_data_pop.iloc[:, 1]
-            post_intervention_pop_sterilised = post_intervention_data_pop.iloc[:, 2]
-
-            # Replace post-intervention timeframe with post-intervention data
-            intervention_df_sp["Sterilisation Rate"][start_month + duration + 1:model_length] = post_intervention_sp
-            intervention_df_pop["Total Population"][
-            start_month + duration + 1:model_length] = post_intervention_pop_total
-            intervention_df_pop["Sterilised Population"][
-            start_month + duration + 1:model_length] = post_intervention_pop_sterilised
-
-            return intervention_df_sp, intervention_df_pop
-
-        elif intervention_type == "3":
-            # Get the inputs and run the function for 3
-            start_month = int(input("Which month do you want to start the intervention?: "))
-            monthly_sterilisations = int(input("How many sterilisations per month will be taking place?: "))
-            target_sterilisation_prop = int(input("What is your target sterilisation proportion?: "))
-
-            duration = growth_binary_search_t(t0=0, N0, initial_S_N, desired_n_s=monthly_sterilisations, h, k, p_f, s_a, s_i, l, r_r, m, desired_S_N=target_sterilisation_prop)
+            monthly_sterilisations = growth_binary_search_n_s(**intervention_parameters)
+            intervention_parameters["n_s"] = monthly_sterilisations
 
             # Create a copy of current dataframe to modify
             intervention_df_sp = current_df_sp.copy()
             intervention_df_pop = current_df_pop.copy()
 
             # Calculate population for each month of intervention
-            intervention_data_sp = \
-            runge_kutta(t0=0, N0, initial_S_N, desired_t=duration, h, k, p_f, s_a, s_i, l, r_r, m, n_s=monthly_sterilisations)[5]
-            intervention_data_pop = \
-            runge_kutta(t0=0, N0, initial_S_N, desired_t=duration, h, k, p_f, s_a, s_i, l, r_r, m, n_s=monthly_sterilisations)[6]
+            intervention_data_sp = runge_kutta(**intervention_parameters)[5]
+            intervention_data_pop = runge_kutta(**intervention_parameters)[6]
 
-            # Isolate sterilisation rates
+            # Isolate sterilisation props and population data
             intervention_sterilisation_props = intervention_data_sp.iloc[:, 1]
             intervention_population_total = intervention_data_pop.iloc[:, 1]
-            intervention_population_sterilised = intervention_data_pop[:, 2]
+            intervention_population_sterilised = intervention_data_pop.iloc[:, 2]
 
             # Replace intervention timeframe with intervention data
             intervention_df_sp["Sterilisation Proportion"][
-            start_month:start_month + duration + 1] = intervention_sterilisation_props
-            intervention_df_pop["Total Population"][
-            start_month:start_month + duration + 1] = intervention_population_total
+            start_month:start_month + intervention_parameters.get("desired_t")
+                        + 1] = intervention_sterilisation_props
+            intervention_df_pop["Total Population"][start_month:start_month + intervention_parameters.get("desired_t")
+                                                                + 1] = intervention_population_total
             intervention_df_pop["Sterilised Population"][
-            start_month:start_month + duration + 1] = intervention_population_sterilised
+            start_month:start_month + intervention_parameters.get("desired_t")
+                        + 1] = intervention_population_sterilised
+
+            # Set post intervention parameters using what we've calculated
+            post_intervention_parameters["N0"] = intervention_df_pop["Total Population"].iloc[
+                start_month + intervention_parameters.get("desired_t")]
+            post_intervention_parameters["initial_S_N"] = intervention_df_sp["Sterilisation Proportion"].iloc[
+                start_month + intervention_parameters.get("desired_t")]
+            post_intervention_parameters["lower_S_N"] = intervention_parameters.get("lower_S_N")
+            post_intervention_parameters["upper_S_N"] = intervention_parameters.get("upper_S_N")
+            post_intervention_parameters["n_s"] = kwargs.get("n_s")
+            post_intervention_parameters["desired_t"] = kwargs.get(
+                "desired_t") - start_month - intervention_parameters.get("desired_t") - 1
+            post_intervention_parameters["k"] = kwargs.get("k")
+            post_intervention_parameters["p_f"] = kwargs.get("p_f")
+            post_intervention_parameters["s_a"] = kwargs.get("s_a")
+            post_intervention_parameters["s_i"] = kwargs.get("s_i")
+            post_intervention_parameters["l"] = kwargs.get("l")
+            post_intervention_parameters["r_r"] = kwargs.get("r_r")
+            post_intervention_parameters["m"] = kwargs.get("m")
 
             # Calculate population for each month post intervention
-            post_intervention_data_sp = \
-            runge_kutta(t0=0, N0=intervention_population_total[-1], initial_S_N, desired_t=model_length - start_month - duration - 1,
-                        h, k, p_f, s_a, s_i, l, r_r, m, n_s=initial_n_s)[5]
-            post_intervention_data_pop = \
-            runge_kutta(t0=0, N0=intervention_population_total[-1], initial_S_N, desired_t=model_length - start_month - duration - 1,
-                        h, k, p_f, s_a, s_i, l, r_r, m, n_s=initial_n_s)[6]
+            post_intervention_data_sp = runge_kutta(**post_intervention_parameters)[5]
+            post_intervention_data_pop = runge_kutta(**post_intervention_parameters)[6]
 
             post_intervention_sp = post_intervention_data_sp.iloc[:, 1]
             post_intervention_pop_total = post_intervention_data_pop.iloc[:, 1]
             post_intervention_pop_sterilised = post_intervention_data_pop.iloc[:, 2]
 
             # Replace post-intervention timeframe with post-intervention data
-            intervention_df_sp["Sterilisation Rate"][start_month + duration + 1:model_length] = post_intervention_sp
-            intervention_df_pop["Total Population"][
-            start_month + duration + 1:model_length] = post_intervention_pop_total
-            intervention_df_pop["Sterilised Population"][
-            start_month + duration + 1:model_length] = post_intervention_pop_sterilised
+            intervention_df_sp["Sterilisation Proportion"][start_month + intervention_parameters.get("desired_t")
+                                                     + 1:kwargs.get("desired_t")] = post_intervention_sp
+            intervention_df_pop["Total Population"][start_month + intervention_parameters.get("desired_t")
+                                                    + 1:kwargs.get("desired_t")] = post_intervention_pop_total
+            intervention_df_pop["Sterilised Population"][start_month + intervention_parameters.get("desired_t")
+                                                         + 1:kwargs.get("desired_t")] = post_intervention_pop_sterilised
 
             return intervention_df_sp, intervention_df_pop
 
@@ -402,7 +439,7 @@ initial_parameters = {
     "initial_S_N": None,
     "desired_S_N": None,
     "lower_S_N": None,
-    "upper_S_N": None
+    "upper_S_N": None,
     "n_s": 0,
     "desired_t": None,
     "h": 1,
@@ -415,16 +452,43 @@ initial_parameters = {
     "m": 0
 }
 
-# I'm thinking we could also add a dictionary to keep track of intervention parameters so that we can
-# give the dictionary as a set of parameters to the function instead of having multiple parameters to pass.
-# We won't need to store previous intervention parameters because once we have the dataframe data that's all
-# we need and all we'll need to delete.
+intervention_parameters = {
+    "t0": 0,
+    "N0": None,
+    "initial_S_N": None,
+    "desired_S_N": None,
+    "lower_S_N": None,
+    "upper_S_N": None,
+    "n_s": 0,
+    "desired_t": None,
+    "h": 1,
+    "k": 100000,
+    "p_f": None,
+    "s_a": 1,
+    "s_i": 0.4,
+    "l": None,
+    "r_r": 2,
+    "m": 0
+}
 
-
-# Test model
-graph_runge_kutta(t0=t0, N0=N0, initial_S_N=initial_S_N, desired_t=desired_t, h=h, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, m=m, n_s=n_s, lower_S_N=lower_S_N, upper_S_N=upper_S_N)
-
-
+post_intervention_parameters = {
+    "t0": 0,
+    "N0": None,
+    "initial_S_N": None,
+    "desired_S_N": None,
+    "lower_S_N": None,
+    "upper_S_N": None,
+    "n_s": 0,
+    "desired_t": None,
+    "h": 1,
+    "k": 100000,
+    "p_f": None,
+    "s_a": 1,
+    "s_i": 0.4,
+    "l": None,
+    "r_r": 2,
+    "m": 0
+}
 
 
 # NEW MAIN CODE
@@ -434,26 +498,47 @@ model_iterations = []
 
 # First we want to use inputs to create initial model with data stored in df
 # Find initial conditions of model
-parameters["N0"] = int(input("What is the initial total number of dogs in the population?: ").strip())
-parameters["initial_S_N"] = int(input("What is the initial sterilisation proportion as a decimal? (e.g. 0.4 for 40% of "
-                                      "population sterilised): ").strip())
-parameters["n_s"] = int(input("How many sterilisations per month are currently taking place? (If none, enter 0): ").strip())
-parameters["desired_t"] = int(input("How many months would you like to model over?: ").strip())
-parameters["k"] = int(input("What is the carrying capacity of the environment? (If unknown, enter 100000): ").strip())
-parameters["p_f"] = int(input("What proportion of the population are female (as a decimal)?: ").strip())
-parameters["s_i"] = int(input("What is the infant survivability rate (as a decimal)?: ").strip())
-parameters["l"] = int(input("What is the average litter size for this area?: ").strip())
-parameters["r_r"] = int(input("On average, how many litters per year will a female dog have?: ").strip())
-parameters["m"] = int(input("What is the net proportion of dogs (from whole population) that migrate into the area? "
-                            "(Please note that if the net migration is out of the community, you'll need to enter a minus"
-                            "sign in front of the value): "))
+#initial_parameters["N0"] = int(input("What is the initial total number of dogs in the population?: ").strip())
+#initial_parameters["initial_S_N"] = float(input("What is the initial sterilisation proportion as a decimal? (e.g. 0.4 for 40% of "
+#                                      "population sterilised): ").strip())
+#initial_parameters["n_s"] = int(input("How many sterilisations per month are currently taking place? (If none, enter 0): ").strip())
+#initial_parameters["desired_t"] = int(input("How many months would you like to model over?: ").strip())
+#initial_parameters["k"] = int(input("What is the carrying capacity of the environment? (If unknown, enter 100000): ").strip())
+#initial_parameters["p_f"] = float(input("What proportion of the population are female (as a decimal)?: ").strip())
+#initial_parameters["s_i"] = float(input("What is the infant survivability rate (as a decimal)?: ").strip())
+#initial_parameters["l"] = int(input("What is the average litter size for this area?: ").strip())
+#initial_parameters["r_r"] = int(input("On average, how many litters per year will a female dog have?: ").strip())
+#initial_parameters["m"] = float(input("What is the net proportion of dogs (from whole population) that migrate into the area? "
+#                            "(Please note that if the net migration is out of the community, you'll need to enter a minus "
+#                            "sign in front of the value): "))
+
+
+# Find initial conditions of model
+initial_parameters["N0"] = 1200
+initial_parameters["initial_S_N"] = 0.2
+initial_parameters["n_s"] = 0
+initial_parameters["desired_t"] = 24
+initial_parameters["k"] = 100000
+initial_parameters["p_f"] = 0.5
+initial_parameters["s_i"] = 0.4
+initial_parameters["l"] = 6
+initial_parameters["r_r"] = 2
+initial_parameters["m"] = 0
+
 
 # Calculate model here and add dataframe to list
+df_sp = runge_kutta(**initial_parameters)[5]
+df_pop = runge_kutta(**initial_parameters)[6]
+
 # Plot model
+graph_runge_kutta(df_sp, df_pop)
 
 # On click of add_intervention
 # Run function which spits out a new dataframe and add to list
+df_int_sp = add_intervention(df_sp, df_pop, **initial_parameters)[0]
+df_int_pop = add_intervention(df_sp, df_pop, **initial_parameters)[1]
 # Plot last model in list
+graph_runge_kutta(df_int_sp, df_int_pop)
 
 # On click of go_back
 # Remove last dataframe from list and plot new last df in list
