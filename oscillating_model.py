@@ -325,9 +325,8 @@ def add_intervention(current_df_sp, current_df_pop, **kwargs):
 
             # Intervention parameter assignment
             start_month = int(input("Which month do you want to start the intervention?: ").strip())
-            intervention_parameters["N0"] = current_df_pop["Total Population"].iloc[intervention_parameters.get("t0")]
-            intervention_parameters["initial_S_N"] = current_df_sp["Sterilisation Proportion"].iloc[
-                intervention_parameters.get("t0")]
+            intervention_parameters["N0"] = current_df_pop["Total Population"].iloc[start_month]
+            intervention_parameters["initial_S_N"] = current_df_sp["Sterilisation Proportion"].iloc[start_month]
             intervention_parameters["desired_S_N"] = float(input("Please enter the target sterilisation proportion as a decimal: ").strip())
             intervention_parameters["lower_S_N"] = float(
                 input("Please enter a value for the lower sterilisation proportion "
@@ -347,6 +346,7 @@ def add_intervention(current_df_sp, current_df_pop, **kwargs):
 
             monthly_sterilisations = growth_binary_search_n_s(**intervention_parameters)
             intervention_parameters["n_s"] = monthly_sterilisations
+            print("************", monthly_sterilisations, "*************")
 
             # Create a copy of current dataframe to modify
             intervention_df_sp = current_df_sp.copy()
