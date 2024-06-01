@@ -7,8 +7,8 @@ import equation_functions
 
 # Choose values for equations to test plotting and estimation
 t0 = 0                 # Initial time
-N0 = 1200              # Initial total population
-desired_t = 12         # Time over which to model (in months)
+N0 = 1000              # Initial total population
+desired_t = 18         # Time over which to model (in months)
 h = 1                  # Step size for Runge Kutta method (1 recommended)
 k = 100000             # Carrying capacity of environment
 p_f = 0.5              # Proportion of population that are female (0-1)
@@ -16,7 +16,7 @@ s_a = 1                # Adult survivability rate (0-1)
 s_i = 0.4              # Infant survivability rate (0-1)
 l = 6                  # Reproduction rate/average litter size
 r_r = 2/12             # Average number of litters (monthly)
-S0 = 240               # Initial number of sterilised dogs
+S0 = 800               # Initial number of sterilised dogs
 m = 0                  # Net migration rate (positive into environment, negative out) (0-1)
 n_s = 0                # Number of sterilisations taking place each month
 desired_S_N = 0.8      # Desired sterilisation proportion

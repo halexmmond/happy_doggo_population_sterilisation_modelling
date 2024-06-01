@@ -132,8 +132,8 @@ def graph_runge_kutta(df_sterilisation_prop, df_population):
     plt.title('Approximation sterilisation proportion using Fourth Order Runge-Kutta Method')
     plt.axhline(0, color='black', linewidth=0.5)
     plt.axvline(0, color='black', linewidth=0.5)
-    #plt.axhline(lower_S_N, color='red', linestyle='dotted')
-    #plt.axhline(upper_S_N, color='red', linestyle='dotted')
+    plt.axhline(lower_S_N, color='red', linestyle='dotted')
+    plt.axhline(upper_S_N, color='red', linestyle='dotted')
     plt.grid(True)
     plt.legend()
     plt.show()
@@ -270,8 +270,9 @@ def add_intervention(current_df_sp, current_df_pop, **kwargs):
             intervention_df_pop = current_df_pop.copy()
 
             # Calculate population for each month of intervention
-            intervention_data_sp = runge_kutta(**intervention_parameters)[5]
-            intervention_data_pop = runge_kutta(**intervention_parameters)[6]
+            intervention_data = runge_kutta(**intervention_parameters)
+            intervention_data_sp = intervention_data[5]
+            intervention_data_pop = intervention_data[6]
 
             # Isolate sterilisation props and population data
             intervention_sterilisation_props = intervention_data_sp.iloc[1:, 1]
@@ -306,8 +307,9 @@ def add_intervention(current_df_sp, current_df_pop, **kwargs):
             post_intervention_parameters["m"] = kwargs.get("m")
 
             # Calculate population for each month post intervention
-            post_intervention_data_sp = runge_kutta(**post_intervention_parameters)[5]
-            post_intervention_data_pop = runge_kutta(**post_intervention_parameters)[6]
+            post_intervention_data = runge_kutta(**post_intervention_parameters)
+            post_intervention_data_sp = post_intervention_data[5]
+            post_intervention_data_pop = post_intervention_data[6]
 
             post_intervention_sp = post_intervention_data_sp.iloc[1:, 1]
             post_intervention_pop_total = post_intervention_data_pop.iloc[1:, 1]
@@ -353,8 +355,9 @@ def add_intervention(current_df_sp, current_df_pop, **kwargs):
             intervention_df_pop = current_df_pop.copy()
 
             # Calculate population for each month of intervention
-            intervention_data_sp = runge_kutta(**intervention_parameters)[5]
-            intervention_data_pop = runge_kutta(**intervention_parameters)[6]
+            intervention_data = runge_kutta(**intervention_parameters)
+            intervention_data_sp = intervention_data[5]
+            intervention_data_pop = intervention_data[6]
 
             # Isolate sterilisation props and population data
             intervention_sterilisation_props = intervention_data_sp.iloc[1:, 1]
@@ -395,8 +398,9 @@ def add_intervention(current_df_sp, current_df_pop, **kwargs):
             post_intervention_parameters["m"] = kwargs.get("m")
 
             # Calculate population for each month post intervention
-            post_intervention_data_sp = runge_kutta(**post_intervention_parameters)[5]
-            post_intervention_data_pop = runge_kutta(**post_intervention_parameters)[6]
+            post_intervention_data = runge_kutta(**post_intervention_parameters)
+            post_intervention_data_sp = post_intervention_data[5]
+            post_intervention_data_pop = post_intervention_data[6]
 
             post_intervention_sp = post_intervention_data_sp.iloc[1:, 1]
             post_intervention_pop_total = post_intervention_data_pop.iloc[1:, 1]
@@ -407,12 +411,14 @@ def add_intervention(current_df_sp, current_df_pop, **kwargs):
             intervention_df_pop.iloc[start_month+intervention_parameters.get("desired_t")+1:kwargs.get("desired_t")+1, 1] = post_intervention_pop_total
             intervention_df_pop.iloc[start_month+intervention_parameters.get("desired_t")+1:kwargs.get("desired_t")+1, 2] = post_intervention_pop_sterilised
 
-            return intervention_df_sp, intervention_df_pop
+            return intervention_df_sp, intervention_df_pop, monthly_sterilisations
 
         else:
             print("I didn't understand that. Could you try again?")
 
-
+def undo(models):
+    models = models[:-1]
+    return models
 
 
 ### Code
@@ -520,7 +526,7 @@ model_iterations = []
 initial_parameters["N0"] = 1200
 initial_parameters["initial_S_N"] = 0.2
 initial_parameters["n_s"] = 0
-initial_parameters["desired_t"] = 24
+initial_parameters["desired_t"] = 80
 initial_parameters["k"] = 100000
 initial_parameters["p_f"] = 0.5
 initial_parameters["s_i"] = 0.4
@@ -530,23 +536,36 @@ initial_parameters["m"] = 0
 
 
 # Calculate model here and add dataframe to list
-results = runge_kutta(**initial_parameters)
-df_sp = results[5]
-df_pop = results[6]
-
+initial_model = runge_kutta(**initial_parameters)
+df_sp = initial_model[5]
+df_pop = initial_model[6]
+model_iterations.append(initial_model)
 
 # Plot model
 graph_runge_kutta(df_sp, df_pop)
 
 # On click of add_intervention
 # Run function which spits out a new dataframe and add to list
-results_int = add_intervention(df_sp, df_pop, **initial_parameters)
-df_int_sp = results_int[0]
+intervention_model = add_intervention(df_sp, df_pop, **initial_parameters)
+df_int_sp = intervention_model[0]
 print(df_int_sp)
-df_int_pop = results_int[1]
+df_int_pop = intervention_model[1]
 print(df_int_pop)
+model_iterations.append(intervention_model)
+
+# Add another
+another_model = add_intervention(df_int_sp, df_int_pop, **initial_parameters)
+df_int_two_sp = another_model[0]
+df_int_two_pop = another_model[1]
+model_iterations.append(another_model)
+
+print(model_iterations)
+print(len(model_iterations))
+
+#model_iterations = undo(model_iterations)
+
 # Plot last model in list
-graph_runge_kutta(df_int_sp, df_int_pop)
+graph_runge_kutta(model_iterations[-1][0], model_iterations[-1][1])
 
 # On click of go_back
 # Remove last dataframe from list and plot new last df in list
