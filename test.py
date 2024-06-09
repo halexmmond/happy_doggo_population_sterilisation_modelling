@@ -1,50 +1,63 @@
-import pandas as pd
 import matplotlib.pyplot as plt
+# dN_dt = N * (p_f * a)
 
-t = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-S_N = [0.5, 0.6, 0.8, 0.8, 0.7, 0.4, 0.2, 0.3, 0.5]
+# Want to plot a against t
+total_pop_list = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
+adult_count = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
+#adult_count = [40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40]
+pup_count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+adult_proportion_list = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+pups_born_list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+t_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p_f = 0.5
+s_i = 0.4
+s_a = 0.7777777
+k = 40000
 
-df = pd.DataFrame()
-df["Month"] = t
-df["SR"] = S_N
+for t in range(12, 48):
 
-df_sr = pd.DataFrame()
-df_sr["Month"] = [2, 3, 4, 5]
-df_sr["SR"] = [0.9, 0.9, 0.9, 0.9]
+    pups_born = total_pop_list[t-2] * ((k - total_pop_list[t-1])/k) * p_f * s_i * s_a * adult_proportion_list[t-2]
+    pups_born_list.append(pups_born)
 
-start_month = 2
-duration = 3
+    total_pups = pup_count[t-1] + pups_born - pups_born_list[t-12]
+    pup_count.append(total_pups)
 
-print(df)
-print(df_sr)
+    if t-96 < 0:
+        eight_year_olds = 0
+    else:
+        eight_year_olds = pups_born_list[t-96]
 
-# Create a copy of current dataframe to modify
-intervention_df = df.copy()
+    total_adults = adult_count[t-1] + pups_born_list[t-12] - eight_year_olds
+    adult_count.append(total_adults)
 
-# Isolate sterilisation rates
-intervention_sterilisation_rates = df_sr.iloc[:, 1]
+    total_pop = total_pop_list[t-1] + pups_born - eight_year_olds
+    total_pop_list.append(total_pop)
 
-print(intervention_sterilisation_rates)
+    adult_proportion = total_adults/total_pop
+    adult_proportion_list.append(adult_proportion)
 
-intervention_df["SR"][start_month:start_month+duration+1] = intervention_sterilisation_rates
+    t_list.append(t+1)
 
-print(intervention_df)
+plt.figure(figsize=(10, 6))
+plt.plot(t_list, adult_proportion_list, label='', marker='x')
+plt.xlabel('Month')
+plt.ylabel('Adult Proportion')
+plt.axhline(0, color='black', linewidth=0.5)
+plt.axvline(0, color='black', linewidth=0.5)
+plt.grid(True)
+plt.legend()
+plt.show()
+
+plt.figure(figsize=(10, 6))
+plt.plot(t_list, total_pop_list, label='', marker='x')
+plt.xlabel('Month')
+plt.ylabel('Total Proportion')
+plt.axhline(0, color='black', linewidth=0.5)
+plt.axvline(0, color='black', linewidth=0.5)
+plt.grid(True)
+plt.legend()
+plt.show()
 
 
-params = {
-    "t0": None
-}
-
-print(params)
-
-print(params.get("t0"))
-
-params["t0"] = 5
-
-print(params.get("t0"))
-
-
-
-# Find initial conditions of model
-print(int(input("What is the initial total number of dogs in the population?: ").strip()))
-
+print(adult_proportion_list[-1])
+print(total_pop_list[-1])

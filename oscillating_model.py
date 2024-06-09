@@ -122,6 +122,7 @@ def graph_runge_kutta(df_sterilisation_prop, df_population):
     sterilisation_props = df_sterilisation_prop["Sterilisation Proportion"]
     total_population = df_population["Total Population"]
     sterilised_population = df_population["Sterilised Population"]
+    
 
     # Show sterilisation proportion
     plt.figure(figsize=(10, 6))
@@ -523,9 +524,9 @@ model_iterations = []
 
 # Find initial conditions of model
 initial_parameters["N0"] = 1200
-initial_parameters["initial_S_N"] = 0.2
+initial_parameters["initial_S_N"] = 0.8
 initial_parameters["n_s"] = 0
-initial_parameters["desired_t"] = 80
+initial_parameters["desired_t"] = 18
 initial_parameters["k"] = 100000
 initial_parameters["p_f"] = 0.5
 initial_parameters["s_i"] = 0.4
@@ -553,10 +554,10 @@ print(df_int_pop)
 model_iterations.append(intervention_model)
 
 # Add another
-another_model = add_intervention(df_int_sp, df_int_pop, **initial_parameters)
-df_int_two_sp = another_model[0]
-df_int_two_pop = another_model[1]
-model_iterations.append(another_model)
+#another_model = add_intervention(df_int_sp, df_int_pop, **initial_parameters)
+#df_int_two_sp = another_model[0]
+#df_int_two_pop = another_model[1]
+#model_iterations.append(another_model)
 
 print(model_iterations)
 print(len(model_iterations))
