@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 
 # Want to plot a against t
 total_pop_list = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
-adult_count = [1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000]
+adult_count = [600, 600, 600, 600, 600, 600, 600, 600, 600, 600, 600, 600]
 #adult_count = [40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40]
 pup_count = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-adult_proportion_list = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+adult_proportion_list = [0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6]
 pups_born_list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 t_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 p_f = 0.5
@@ -14,7 +14,7 @@ s_i = 0.4
 s_a = 0.7777777
 k = 40000
 
-for t in range(12, 48):
+for t in range(12, 400):
 
     pups_born = total_pop_list[t-2] * ((k - total_pop_list[t-1])/k) * p_f * s_i * s_a * adult_proportion_list[t-2]
     pups_born_list.append(pups_born)
