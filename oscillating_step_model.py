@@ -29,7 +29,7 @@ s_a_month = 1 - ((1 - s_a_lifespan) / lifespan * 12) # Need to find a value for 
 initial_adult_prop = 0
 l = 6
 r_r = 2
-m_in = 0
+m_net_in = 0
 k = 100000
 t0 = 0
 
@@ -44,14 +44,19 @@ adult_prop_list = [initial_adult_prop]
 
 
 # Births per month
+# i.e. total pop two months ago x logistic factor x female prop x monthly adult survivability
+# x infant survivability x average litter size x litters per month x adult prop 2 months ago
+# x sterilisation proportion 2 months ago (assuming same prop sterilised under and over 1)
 pups_born = N_list[t-2] * ((k - N_list[t-2]) / k) * p_f * s_a_month * s_i * l * (r_r/12) * adult_prop_list[t-2] * (1 - (S_list[t-2]/N_list[t-2]))
 
 # Deaths per month
+# i.e. total pop one month ago x adult prop one month ago x monthly adult mortality +
+# pups born 8 years ago that have survived 8 years, but look at deaths monthly
 monthly_deaths = (N_list[t-1] * adult_prop_list[t-1] * (1 - s_a_month)) + \
                  ((pups_born_list[t - (12*lifespan)] * s_a_lifespan) / 12)
 
-# Net migration per month
-net_migration_in = N_list[t-1] * m_in # This is for m as a percentage of total population
+# Net migration per month as a percentage of population
+net_migration_in = N_list[t-1] * m_net_in # This is for m as a percentage of total population
 
 # Change in population per month
 # dN_dt = pups_born - monthly_deaths + net_migration_in
