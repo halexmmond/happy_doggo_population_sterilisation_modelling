@@ -43,7 +43,7 @@ def runge_kutta(t0, N0, desired_t, h, k, p_f, s_a, s_i, l, r_r, S0, m, n_s):
         k4 = h * dNdt(t=t + h, N_t=N_t + k3, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, r_r=r_r, S0=S0, m=m, n_s=n_s)
 
         # Update N using weighted average of k's
-        N_t = N_t + (k1 + 2 * k2 + 2 * k3 + k4) / 6
+        N_t = N_t + ((k1 + 2 * k2 + 2 * k3 + k4) / 6)
 
         if N_t < 0:
             N_t = 0.1
