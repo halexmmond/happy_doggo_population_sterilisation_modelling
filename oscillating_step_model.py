@@ -82,12 +82,24 @@ def dN_dt(births, deaths, net_migration_in):
     dN_dt = births - deaths + net_migration_in
     return dN_dt
 
-
-
-## Keeping track of adult/puppy population
+# Total number of sterilised dogs in population
+def num_sterilised_dogs(initial_S_N, N0, s_a, m, n_s, t):
+    S0 = N0 * initial_S_N
+    S_t = ((n_s + ((m + s_a - 1) * S0)) * t) + S0
+    return S_t
 
 # Total puppy population
-N_puppy = N_puppy_list[t-1] + monthly_births[t] - monthly_births_list[t-12] + (net_migration_in[t] * (1 - p_adult_list[t-1]))
+def puppy_population(N_puppy_one_month_ago, births_t, births_t_one_year_ago, net_migration_in, p_adult):
+    N_puppy_current = N_puppy_one_month_ago + births_t - births_t_one_year_ago + (net_migration_in * (1 - p_adult))
+    # Note that this is the formula we are calculating
+    # N_puppy = N_puppy_list[t-1] + monthly_births[t] - monthly_births_list[t-12] + (net_migration_in[t] * (1 - p_adult_list[t-1]))
+    # We need to make sure we have the correct index for t
+    return N_puppy_current
 
 # Total adult population
-N_adult = N_adult_list[t-1] + monthly_births_list[t-12] - monthly_deaths[t] + (net_migration_in[t] * p_adult_list[t-1])
+def adult_population(N_adult_one_month_ago, births_t_one_year_ago, deaths_t, net_migration_in, p_adult):
+    N_adult_current = N_adult_one_month_ago + births_t_one_year_ago - deaths_t + (net_migration_in * p_adult)
+    # Note that this is the formula we are calculating
+    # N_adult = N_adult_list[t-1] + monthly_births_list[t-12] - monthly_deaths[t] + (net_migration_in[t] * p_adult_list[t-1])
+    # We need to make sure we have the correct index for t
+    return N_adult_current
