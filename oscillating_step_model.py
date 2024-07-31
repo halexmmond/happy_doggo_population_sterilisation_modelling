@@ -59,22 +59,30 @@ def monthly_births(k, p_f, s_a_month, s_i, l, r_r, N_total, p_adult, S_total):
     # We need to make sure we have the correct index for t
     return births
 
-#
-
-
-
-
-# Deaths per month
+# Monthly deaths
 # i.e. total pop one month ago x adult prop one month ago x monthly adult mortality +
-# pups born 8 years ago that have survived 8 years, but look at deaths monthly
-monthly_deaths = (N_list[t-1] * p_adult_list[t-1] * (1 - s_a_month)) + \
-                 (monthly_births_list[t - lifespan] * (1 - ((1 - s_a_month) * lifespan)))
+# pups born lifespan-12 months ago that have survived until lifespan months, but look at deaths monthly
+def monthly_deaths(N_total, p_adult, s_a_month, monthly_births, lifespan):
+    deaths = (N_total * p_adult * (1 - s_a_month)) + (monthly_births * (1 - ((1 - s_a_month) * lifespan)))
+    # Note that this is the formula we are calculating
+    # monthly_deaths = (N_list[t-1] * p_adult_list[t-1] * (1 - s_a_month)) + (monthly_births_list[t - lifespan] * (1 - ((1 - s_a_month) * lifespan)))
+    # We need to make sure we have the correct index for t
+    return deaths
 
-# Net migration per month as a percentage of population
-net_migration_in = N_list[t-1] * m_net_in # This is for m as a percentage of total population
+# Monthly net migration
+def monthly_net_migration_in(N_total, m_net_in):
+    net_migration_in = N_total * m_net_in
+    # Note that this is the formula we are calculating
+    # net_migration_in = N_list[t-1] * m_net_in # This is for m as a percentage of total population
+    # We need to make sure we have the correct index for t
+    return net_migration_in
 
-# Change in population per month
-dN_dt = monthly_births - monthly_deaths + net_migration_in
+# Monthly change in population
+def dN_dt(births, deaths, net_migration_in):
+    dN_dt = births - deaths + net_migration_in
+    return dN_dt
+
+
 
 ## Keeping track of adult/puppy population
 
