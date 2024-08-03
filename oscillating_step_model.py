@@ -70,52 +70,10 @@ def adult_population(N_adult_one_month_ago, births_t_one_year_ago, deaths_t, net
 
 ### Code
 
-# Create a dictionary to keep arguments/parameters of model in
-initial_parameters = {
-    "p_lifespan": None,
-    "lifespan": None,
-    "k": None,
-    "p_f": None,
-    "s_a_month": None,
-    "s_i": None,
-    "l": None,
-    "r_r": None,
-    "N_total": None, # don't think we need this in initial conditions
-    "initial_prop_adult": None,
-    "S_total": None, # don't need this here either
-    "m_net_in": None,
-    "initial_ster_prop": None,
-    "N0_total": None
-    "t_duration": None # don't need this here either
-}
-
-
 # Empty list in which to store full models
 model_iterations = []
 
-# Pick initial parameters for model
-initial_parameters["p_lifespan"] = 0
-initial_parameters["lifespan"] = 0
-initial_parameters["k"] = 0
-initial_parameters["p_f"] = 0
-initial_parameters["s_a_month"] = 0
-initial_parameters["s_i"] = 0
-initial_parameters["l"] = 0
-initial_parameters["r_r"] = 0
-initial_parameters["N_total"] = 0 # do we need this in initial conditions? I don't think so
-initial_parameters["initial_prop_adult"] = 0
-initial_parameters["S_total"] = 0 # don't need this here either
-initial_parameters["m_net_in"] = 0
-initial_parameters["initial_ster_prop"] = 0
-initial_parameters["N0_total"] = 0
-initial_parameters["t_duration"] = 0 # don't need this here either
-
-
-########
-
-# We need to create lists I'm thinking to store the data in
-# Try this way instead of dataframes and see what happens - should still be able to replace at certain index
-
+# Test variables
 N0_total_initial = 1000
 initial_ster_prop = 0.8
 p_f = 0.5
@@ -132,12 +90,13 @@ t_duration = 5
 s_a_month = 0.99
 n_s = 0
 
+# Lists to store data we want to keep track of
 N_total_list = [N0_total_initial]
 S_total_list = [N0_total_initial * initial_ster_prop]
 ster_prop_list = [initial_ster_prop] # Note we are currently saying equally likely for adult and puppy to get sterilised
 N_adult_list = [N0_total_initial * initial_prop_adult]
 N_puppy_list = [N0_total_initial * (1 - initial_prop_adult)]
-monthly_births_list = [0]
+monthly_births_list = []
 monthly_deaths_list = []
 t_list = [t0]
 prop_adult_list = [initial_prop_adult]
@@ -191,3 +150,8 @@ for t in range(1, t_duration+1):
     monthly_births_list.append(births)
     monthly_deaths_list.append(deaths)
     prop_adult_list.append(num_adults/new_N_total)
+    t_list.append(t)
+
+print(t_list)
+print(N_total_list)
+print(S_total_list)
