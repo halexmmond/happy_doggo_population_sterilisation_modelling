@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 
 # Total population of stray dogs as a differential equation
 def dNdt(N_t, k, p_f, s_a, s_i, l, r_r, n_s, S0, t, m):
-    dN_dt = (N_t * ((p_f * s_a * s_i * l * (r_r/12) * (1 - ((((n_s + ((m + s_a - 1) * S0)) * t) + S0) / N_t))) - (1 - s_a) + m))
+    dN_dt = (N_t * ((k - N_t) / k) * -(
+            (p_f * s_a * s_i * l * (r_r/12) * (1 - ((((n_s + ((m + s_a - 1) * S0)) * -t) + S0) / N_t))) - (1 - s_a) + m))
     return dN_dt
 
 
@@ -55,7 +56,7 @@ def runge_kutta(**kwargs):
         t = t + h
 
         # Update S(t)
-        S_t = ((n_s + ((m + s_a - 1) * S0)) * t) + S0
+        S_t = ((n_s + ((m + s_a - 1) * S0)) * -t) + S0
 
         if S_t > N_t:
             S_t = N_t
@@ -89,7 +90,7 @@ def runge_kutta(**kwargs):
         # Optionally, you can print or store the values of t and N_t
         # print(f"t = {t}, N_t = {N_t}")
 
-    return math.ceil(N_t), t_values, N_t_values, S_t_values, S_N_values, sterilisation_prop_data, population_data
+    return math.ceil(N_t), t_values, N_t_values, S_t_values, S_N_values
 
 
 # This function uses the Runge-Kutta method to plot the population and sterilisation growth on a graph
@@ -130,7 +131,7 @@ def graph_runge_kutta(t, N):
 ### Code
 
 # Create a dictionary to keep arguments/parameters of model in
-initial_parameters = {"t0": 0, "N0": 1200, "initial_S_N": 0.8, "desired_S_N": None, "lower_S_N": None,
+initial_parameters = {"t0": 0, "N0": 12000, "initial_S_N": 0.8, "desired_S_N": None, "lower_S_N": None,
                       "upper_S_N": None, "n_s": 0, "desired_t": -24, "h": -1, "k": 100000, "p_f": 0.5, "s_a": 1,
                       "s_i": 0.4, "l": 6, "r_r": 2, "m": 0}
 
