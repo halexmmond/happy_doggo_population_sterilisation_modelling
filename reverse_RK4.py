@@ -29,9 +29,9 @@ def runge_kutta(**kwargs):
     m = kwargs.get("m")
     S_t = 0
 
-    # Not adding month 0 values here because we already have them and are only interested in -1 onwards
-    t_values = []
-    N_t_values = []
+    # Store results
+    t_values = [t]
+    N_t_values = [N_t]
     births_values = []
 
     # Iterate using fourth order Runge-Kutta
@@ -64,7 +64,7 @@ def runge_kutta(**kwargs):
             break
 
     for t in t_values[:-1]:
-        pop_change = N_t_values[t-1] - N_t_values[t]
+        pop_change = N_t_values[t] - N_t_values[t+1]
 
         births = round(reverse_births_RK4(N_t=N_t_values[t], k=k, p_a=p_a, s_a=s_a, m=m, dNdt=pop_change))
 

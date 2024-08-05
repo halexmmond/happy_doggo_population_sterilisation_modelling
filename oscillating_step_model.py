@@ -92,9 +92,9 @@ def runge_kutta(**kwargs):
     m = kwargs.get("m")
     S_t = 0
 
-    # Not adding month 0 values here because we already have them and are only interested in -1 onwards
-    t_values = []
-    N_t_values = []
+    # Results
+    t_values = [t]
+    N_t_values = [N_t]
     births_values = []
 
     # Iterate using fourth order Runge-Kutta
@@ -127,11 +127,11 @@ def runge_kutta(**kwargs):
             break
 
     for t in t_values[:-1]:
-        pop_change = N_t_values[t-1] - N_t_values[t]
+        pop_change = N_t_values[t] - N_t_values[t+1]
 
-        births = round(reverse_births_RK4(N_t=N_t_values[t], k=k, p_a=p_a, s_a=s_a, m=m, dNdt=pop_change))
+        previous_births = round(reverse_births_RK4(N_t=N_t_values[t], k=k, p_a=p_a, s_a=s_a, m=m, dNdt=pop_change))
 
-        births_values.append(births)
+        births_values.append(previous_births)
 
     return t_values[:-1], N_t_values[:-1], births_values
 
@@ -141,8 +141,44 @@ def runge_kutta(**kwargs):
 # Empty list in which to store full models
 model_iterations = []
 
+# Variable dictionary to make it easier when calling a function
+initial_parameters = {
+    "t0": 0,
+    "N0": None,
+    "initial_S_N": None,
+    "desired_S_N": None,
+    "lower_S_N": None,
+    "upper_S_N": None,
+    "n_s": 0,
+    "desired_t": None,
+    "h": 1,
+    "k": 100000,
+    "p_f": None,
+    "s_a": 1,
+    "s_i": 0.4,
+    "l": None,
+    "r_r": 2,
+    "m": 0,
+}
+
+reverse_parameters = {
+    "t0": 0,
+    "N0": None,
+    "desired_t": None,
+    "h": 1,
+    "k": 100000,
+    "p_f": None,
+    "s_a": 1,
+    "s_i": 0.4,
+    "l": None,
+    "r_r": 2,
+    "m": 0,
+    "p_a": None
+}
+
 # Test variables
-N0_total_initial = 1000
+initial_parameters["N0"] = 1000
+initial_parameters["desired_t"] = 13
 initial_ster_prop = 0.8
 p_f = 0.5
 s_i = 0.4
@@ -157,6 +193,24 @@ t0 = 0 # don't need this?
 t_duration = 5
 s_a_month = 0.99
 n_s = 0
+
+# Calculate monthly population from t=-12 up to t=0
+# Set initial variables for reverse process
+reverse_parameters["N0"] = 1000
+reverse_parameters["desired_t"] = 13
+reverse_parameters["p_f"] = 0.5
+reverse_parameters["s_i"] = 0.4
+reverse_parameters["lifespan"] = 72
+reverse_parameters["p_a"] = 1
+reverse_parameters["l"] = 6
+reverse_parameters["r_r"] = 2
+reverse_parameters["m"] = 0
+reverse_parameters["k"] = 100000
+s_a_month = 0.99
+
+t_previous_12 = [-12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0]
+N_previous_12 = runge_kutta()
+#births_previous_12 =
 
 # Lists to store data we want to keep track of
 N_total_list = [N0_total_initial]
