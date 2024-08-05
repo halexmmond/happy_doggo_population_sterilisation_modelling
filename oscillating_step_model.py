@@ -83,7 +83,7 @@ def runge_kutta(**kwargs):
     desired_t = kwargs.get("desired_t")  # target
     h = kwargs.get("h")  # chosen step size
     k = kwargs.get("k")
-    p_a = kwargs.get("p_a")  # add this to dictionary where needed
+    p_a = kwargs.get("p_a")
     p_f = kwargs.get("p_f")
     s_a = kwargs.get("s_a")
     s_i = kwargs.get("s_i")
@@ -91,25 +91,24 @@ def runge_kutta(**kwargs):
     r_r = kwargs.get("r_r")
     m = kwargs.get("m")
     S_t = 0
-    n_s = 0
 
     # Not adding month 0 values here because we already have them and are only interested in -1 onwards
     t_values = []
     N_t_values = []
-    #births_values = []
+    births_values = []
 
     # Iterate using fourth order Runge-Kutta
     while t < desired_t + 1:
         # Calculate k1, k2, k3, k4
-        k1 = h * dNdt(t=t, N_t=N_t, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S_t, r_r=r_r, m=m, n_s=n_s)
-        k2 = h * dNdt(t=t + 0.5 * h, N_t=N_t + 0.5 * k1, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S_t, r_r=r_r,
-                      m=m, n_s=n_s)
-        k3 = h * dNdt(t=t + 0.5 * h, N_t=N_t + 0.5 * k2, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S_t, r_r=r_r,
-                      m=m, n_s=n_s)
-        k4 = h * dNdt(t=t + h, N_t=N_t + k3, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S_t, r_r=r_r, m=m, n_s=n_s)
+        k1 = h * dN_dt_reverse_RK4(t=t, N_t=N_t, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S_t, r_r=r_r, m=m)
+        k2 = h * dN_dt_reverse_RK4(t=t + 0.5 * h, N_t=N_t + 0.5 * k1, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l,
+                                   S0=S_t, r_r=r_r, m=m)
+        k3 = h * dN_dt_reverse_RK4(t=t + 0.5 * h, N_t=N_t + 0.5 * k2, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l,
+                                   S0=S_t, r_r=r_r, m=m)
+        k4 = h * dN_dt_reverse_RK4(t=t + h, N_t=N_t + k3, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S_t, r_r=r_r, m=m)
 
         # Update N using weighted average of k's
-        N_t = N_t + (k1 + 2 * k2 + 2 * k3 + k4) / 6
+        N_t = round(N_t + (k1 + 2 * k2 + 2 * k3 + k4) / 6)
 
         # Update N_t in dictionary
 
@@ -122,16 +121,19 @@ def runge_kutta(**kwargs):
         # Store values in list
         t_values.append(t)
         N_t_values.append(N_t)
-        #births_values.append(births)
 
         # Check if t is close enough to desired_t
         if abs(t - desired_t) < 0.01:
             break
 
-        # Optionally, you can print or store the values of t and N_t
-        # print(f"t = {t}, N_t = {N_t}")
+    for t in t_values[:-1]:
+        pop_change = N_t_values[t-1] - N_t_values[t]
 
-    return t_values, N_t_values, #births_values
+        births = round(reverse_births_RK4(N_t=N_t_values[t], k=k, p_a=p_a, s_a=s_a, m=m, dNdt=pop_change))
+
+        births_values.append(births)
+
+    return t_values[:-1], N_t_values[:-1], births_values
 
 
 ### Code

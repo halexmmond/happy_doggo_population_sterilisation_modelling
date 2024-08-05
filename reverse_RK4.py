@@ -28,12 +28,11 @@ def runge_kutta(**kwargs):
     r_r = kwargs.get("r_r")
     m = kwargs.get("m")
     S_t = 0
-    n_s = 0
 
     # Not adding month 0 values here because we already have them and are only interested in -1 onwards
     t_values = []
     N_t_values = []
-    #births_values = []
+    births_values = []
 
     # Iterate using fourth order Runge-Kutta
     while t < desired_t + 1:
@@ -46,7 +45,7 @@ def runge_kutta(**kwargs):
         k4 = h * dN_dt_reverse_RK4(t=t + h, N_t=N_t + k3, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S_t, r_r=r_r, m=m)
 
         # Update N using weighted average of k's
-        N_t = N_t + (k1 + 2 * k2 + 2 * k3 + k4) / 6
+        N_t = round(N_t + (k1 + 2 * k2 + 2 * k3 + k4) / 6)
 
         # Update N_t in dictionary
 
@@ -59,13 +58,19 @@ def runge_kutta(**kwargs):
         # Store values in list
         t_values.append(t)
         N_t_values.append(N_t)
-        #births_values.append(births)
 
         # Check if t is close enough to desired_t
         if abs(t - desired_t) < 0.01:
             break
 
-    return t_values, N_t_values, #births_values
+    for t in t_values[:-1]:
+        pop_change = N_t_values[t-1] - N_t_values[t]
+
+        births = round(reverse_births_RK4(N_t=N_t_values[t], k=k, p_a=p_a, s_a=s_a, m=m, dNdt=pop_change))
+
+        births_values.append(births)
+
+    return t_values, N_t_values, births_values
 
 # This function uses the Runge-Kutta method to plot the population and sterilisation growth on a graph
 def graph_runge_kutta(t, N):
@@ -111,7 +116,8 @@ initial_parameters = {"t0": 0, "N0": 1000, "initial_S_N": 0, "desired_S_N": None
 
 model = runge_kutta(**initial_parameters)
 
-print(model[0])
-print(model[1])
+print(model[0][:-1])
+print(model[1][:-1])
+print(model[2])
 
 graph_runge_kutta(t=model[0], N=model[1])
