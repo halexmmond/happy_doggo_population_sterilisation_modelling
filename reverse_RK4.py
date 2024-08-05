@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 ### Functions
 
 # Total population of stray dogs as a differential equation
-def dNdt(N_t, k, p_f, s_a, s_i, l, r_r, n_s, S0, t, m):
-    dN_dt = (N_t * ((k - N_t) / k) * (
-            (p_f * s_a * s_i * l * (r_r/12) * (1 - ((((n_s + ((m + s_a - 1) * S0)) * t) + S0) / N_t))) - (1 - s_a) + m))
+def dNdt(N_t, k, p_a, p_f, s_a, s_i, l, r_r, n_s, S0, t, m):
+    dN_dt = -(N_t * ((k - N_t) / k) * (
+            (p_a * p_f * s_a * s_i * l * (r_r/12) * (1 - ((((n_s + ((m + s_a - 1) * S0)) * t) + S0) / N_t))) - (1 - s_a) + m))
     return dN_dt
 
 
@@ -22,6 +22,7 @@ def runge_kutta(**kwargs):
     desired_t = kwargs.get("desired_t")  # target
     h = kwargs.get("h")  # chosen step size
     k = kwargs.get("k")
+    p_a = kwargs.get("p_a") # add this to dictionary where needed
     p_f = kwargs.get("p_f")
     s_a = kwargs.get("s_a")
     s_i = kwargs.get("s_i")
@@ -39,10 +40,10 @@ def runge_kutta(**kwargs):
     # Iterate using fourth order Runge-Kutta
     while t < desired_t+1:
         # Calculate k1, k2, k3, k4
-        k1 = h * dNdt(t=t, N_t=N_t, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S0, r_r=r_r, m=m, n_s=n_s)
-        k2 = h * dNdt(t=t + 0.5 * h, N_t=N_t + 0.5 * k1, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S0, r_r=r_r, m=m, n_s=n_s)
-        k3 = h * dNdt(t=t + 0.5 * h, N_t=N_t + 0.5 * k2, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S0, r_r=r_r, m=m, n_s=n_s)
-        k4 = h * dNdt(t=t + h, N_t=N_t + k3, k=k, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S0, r_r=r_r, m=m, n_s=n_s)
+        k1 = h * dNdt(t=t, N_t=N_t, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S0, r_r=r_r, m=m, n_s=n_s)
+        k2 = h * dNdt(t=t + 0.5 * h, N_t=N_t + 0.5 * k1, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S0, r_r=r_r, m=m, n_s=n_s)
+        k3 = h * dNdt(t=t + 0.5 * h, N_t=N_t + 0.5 * k2, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S0, r_r=r_r, m=m, n_s=n_s)
+        k4 = h * dNdt(t=t + h, N_t=N_t + k3, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S0, r_r=r_r, m=m, n_s=n_s)
 
         # Update N using weighted average of k's
         N_t = N_t + (k1 + 2 * k2 + 2 * k3 + k4) / 6
@@ -133,7 +134,7 @@ def graph_runge_kutta(t, N):
 # Create a dictionary to keep arguments/parameters of model in
 initial_parameters = {"t0": 0, "N0": 1000, "initial_S_N": 0, "desired_S_N": None, "lower_S_N": None,
                       "upper_S_N": None, "n_s": 0, "desired_t": 13, "h": 1, "k": 100000, "p_f": 0.5, "s_a": 1,
-                      "s_i": 0.4, "l": 6, "r_r": 2, "m": 0}
+                      "s_i": 0.4, "l": 6, "r_r": 2, "m": 0, "p_a": 0.8}
 
 model = runge_kutta(**initial_parameters)
 
