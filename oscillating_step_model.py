@@ -67,16 +67,13 @@ def adult_population(N_adult_one_month_ago, births_t_one_year_ago, deaths_t, net
     # We need to make sure we have the correct index for t
     return N_adult_current
 
-def dN_dt_reverse_RK4(N_t, k, p_a, p_f, s_a, s_i, l, r_r, n_s, S0, t, m):
-    dNdt = -(N_t * ((k - N_t) / k) * (
-            (p_a * p_f * s_a * s_i * l * (r_r/12) * (1 - ((((n_s + ((m + s_a - 1) * S0)) * t) + S0) / N_t))) - (1 - s_a) + m))
+def dN_dt_reverse_RK4(N_t, k, p_a, p_f, s_a, s_i, l, r_r, S0, m):
+    dNdt = -(N_t * ((k - N_t) / k) * ((p_a * p_f * s_a * s_i * l * (r_r/12) * (1 - (S0/N_t))) - ((1 - s_a) * p_a) + m))
     return dNdt
 
-def reverse_births_RK4(N_t, k, p_a, p_f, s_a, s_i, l, r_r, n_s, S0, t, m):
-    dNdt = -(N_t * ((k - N_t) / k) * (
-            (p_a * p_f * s_a * s_i * l * (r_r / 12) * (1 - ((((n_s + ((m + s_a - 1) * S0)) * t) + S0) / N_t))) - (
-                1 - s_a) + m))
-    return dNdt
+def reverse_births_RK4(N_t, k, p_a, s_a, m, dNdt):
+    births = (dNdt / ((k - N_t) / k)) - m + ((1 - s_a) * p_a)
+    return births
 
 # Function used to find 12 months worth of previous data (N and births) to initialise model
 def runge_kutta(**kwargs):
@@ -96,10 +93,10 @@ def runge_kutta(**kwargs):
     S_t = 0
     n_s = 0
 
-
-    t_values = [t]
-    N_t_values = [N_t]
-    births_values = []
+    # Not adding month 0 values here because we already have them and are only interested in -1 onwards
+    t_values = []
+    N_t_values = []
+    #births_values = []
 
     # Iterate using fourth order Runge-Kutta
     while t < desired_t + 1:
@@ -125,7 +122,7 @@ def runge_kutta(**kwargs):
         # Store values in list
         t_values.append(t)
         N_t_values.append(N_t)
-        births_values.append(births)
+        #births_values.append(births)
 
         # Check if t is close enough to desired_t
         if abs(t - desired_t) < 0.01:
@@ -134,7 +131,7 @@ def runge_kutta(**kwargs):
         # Optionally, you can print or store the values of t and N_t
         # print(f"t = {t}, N_t = {N_t}")
 
-    return t_values, N_t_values, births_values
+    return t_values, N_t_values, #births_values
 
 
 ### Code
@@ -187,7 +184,7 @@ for t in range(1, t_duration+1):
 
     # Calculate number of deaths
     deaths = monthly_deaths(N_total_start=N_total_list[t-1], prop_adult_start=prop_adult_list[t-1], s_a_month=s_a_month,
-                            monthly_births=monthly_births_list[t-lifespan], lifespan=lifespan)
+                            lifespan=lifespan)
 
     # Calculate net migration
     net_migration_in = monthly_net_migration_in(N_total_start=N_total_list[t-1], m_net_in=m_net_in)
