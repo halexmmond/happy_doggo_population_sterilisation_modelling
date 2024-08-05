@@ -67,8 +67,74 @@ def adult_population(N_adult_one_month_ago, births_t_one_year_ago, deaths_t, net
     # We need to make sure we have the correct index for t
     return N_adult_current
 
-# Function used to find 12 months worth of previous data to initialise model
-def reverse_RK4_data():
+def dN_dt_reverse_RK4(N_t, k, p_a, p_f, s_a, s_i, l, r_r, n_s, S0, t, m):
+    dNdt = -(N_t * ((k - N_t) / k) * (
+            (p_a * p_f * s_a * s_i * l * (r_r/12) * (1 - ((((n_s + ((m + s_a - 1) * S0)) * t) + S0) / N_t))) - (1 - s_a) + m))
+    return dNdt
+
+def reverse_births_RK4(N_t, k, p_a, p_f, s_a, s_i, l, r_r, n_s, S0, t, m):
+    dNdt = -(N_t * ((k - N_t) / k) * (
+            (p_a * p_f * s_a * s_i * l * (r_r / 12) * (1 - ((((n_s + ((m + s_a - 1) * S0)) * t) + S0) / N_t))) - (
+                1 - s_a) + m))
+    return dNdt
+
+# Function used to find 12 months worth of previous data (N and births) to initialise model
+def runge_kutta(**kwargs):
+    # Initialize variables from dictionary
+    t = kwargs.get("t0")  # initial time
+    N_t = kwargs.get("N0")  # initial value of N
+    desired_t = kwargs.get("desired_t")  # target
+    h = kwargs.get("h")  # chosen step size
+    k = kwargs.get("k")
+    p_a = kwargs.get("p_a")  # add this to dictionary where needed
+    p_f = kwargs.get("p_f")
+    s_a = kwargs.get("s_a")
+    s_i = kwargs.get("s_i")
+    l = kwargs.get("l")
+    r_r = kwargs.get("r_r")
+    m = kwargs.get("m")
+    S_t = 0
+    n_s = 0
+
+
+    t_values = [t]
+    N_t_values = [N_t]
+    births_values = []
+
+    # Iterate using fourth order Runge-Kutta
+    while t < desired_t + 1:
+        # Calculate k1, k2, k3, k4
+        k1 = h * dNdt(t=t, N_t=N_t, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S_t, r_r=r_r, m=m, n_s=n_s)
+        k2 = h * dNdt(t=t + 0.5 * h, N_t=N_t + 0.5 * k1, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S_t, r_r=r_r,
+                      m=m, n_s=n_s)
+        k3 = h * dNdt(t=t + 0.5 * h, N_t=N_t + 0.5 * k2, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S_t, r_r=r_r,
+                      m=m, n_s=n_s)
+        k4 = h * dNdt(t=t + h, N_t=N_t + k3, k=k, p_a=p_a, p_f=p_f, s_a=s_a, s_i=s_i, l=l, S0=S_t, r_r=r_r, m=m, n_s=n_s)
+
+        # Update N using weighted average of k's
+        N_t = N_t + (k1 + 2 * k2 + 2 * k3 + k4) / 6
+
+        # Update N_t in dictionary
+
+        if N_t < 0:
+            N_t = 0.1
+
+        # Update t
+        t = t + h
+
+        # Store values in list
+        t_values.append(t)
+        N_t_values.append(N_t)
+        births_values.append(births)
+
+        # Check if t is close enough to desired_t
+        if abs(t - desired_t) < 0.01:
+            break
+
+        # Optionally, you can print or store the values of t and N_t
+        # print(f"t = {t}, N_t = {N_t}")
+
+    return t_values, N_t_values, births_values
 
 
 ### Code
