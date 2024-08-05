@@ -8,8 +8,8 @@
 ### Functions
 
 # Adult monthly survivability
-def adult_monthly_survivability(p_lifespan, lifespan):
-    s_a_month = 1 - ((1 - p_lifespan) / (lifespan - 12))
+def adult_monthly_survivability(lifespan):
+    s_a_month = 1 - (1 / (lifespan - 12))
     return s_a_month
 
 # Monthly births
@@ -66,6 +66,9 @@ def adult_population(N_adult_one_month_ago, births_t_one_year_ago, deaths_t, net
     # N_adult = N_adult_list[t-1] + monthly_births_list[t-12] - monthly_deaths[t] + (net_migration_in[t] * p_adult_list[t-1])
     # We need to make sure we have the correct index for t
     return N_adult_current
+
+# Function used to find 12 months worth of previous data to initialise model
+def reverse_RK4_data():
 
 
 ### Code
