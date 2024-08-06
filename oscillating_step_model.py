@@ -3,7 +3,7 @@
 # incorporate the two-month gestation period for dogs before puppies are born
 
 # This file will follow the same steps as oscillating_model.py but with the step model instead
-import numpy as np
+import matplotlib.pyplot as plt
 
 ### Functions
 
@@ -26,8 +26,8 @@ def monthly_births(k, p_f, s_a_month, s_i, l, r_r, N_total_start, prop_adult_sta
 # Monthly deaths
 # i.e. total pop one month ago x adult prop one month ago x monthly adult mortality +
 # pups born lifespan-12 months ago that have survived until lifespan months, but look at deaths monthly
-def monthly_deaths(N_total_start, prop_adult_start, s_a_month, monthly_births, lifespan):
-    deaths = (N_total_start * prop_adult_start * (1 - s_a_month)) + (monthly_births * (1 - ((1 - s_a_month) * lifespan)))
+def monthly_deaths(N_total_start, prop_adult_start, s_a_month):
+    deaths = (N_total_start * prop_adult_start * (1 - s_a_month))
     # Note that this is the formula we are calculating
     # monthly_deaths = (N_list[t-1] * p_adult_list[t-1] * (1 - s_a_month)) + (monthly_births_list[t - lifespan] * (1 - ((1 - s_a_month) * lifespan)))
     # We need to make sure we have the correct index for t
@@ -135,6 +135,24 @@ def runge_kutta(**kwargs):
 
     return t_values[:-1], N_t_values[:-1], births_values
 
+# Plot our results
+def graph_results(t_list, N_list, adult_list, puppy_list):
+    months = t_list
+    total_pop = N_list
+    adult_pop = adult_list
+    puppy_pop = puppy_list
+
+    # Show sterilisation proportion
+    plt.figure(figsize=(10, 6))
+    plt.plot(months, total_pop, label='Total population', marker='*')
+    plt.plot(months, adult_pop, label='Adult population', marker='x')
+    plt.plot(months, puppy_pop, label='Puppy population', marker='o')
+    plt.xlabel('Month')
+    plt.ylabel('Population')
+    plt.title('')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
 
 ### Code
 
@@ -212,12 +230,12 @@ births_previous_12 = list(reversed(births_previous_12))
 N_total_list = N_previous_12
 S_total_list = ([0] * 12) + [initial_parameters.get("N0") * initial_parameters.get("initial_ster_prop")]
 ster_prop_list = ([0] * 12) + [initial_parameters.get("initial_ster_prop")] # Note we are currently saying equally likely for adult and puppy to get sterilised
-N_adult_list = (["NaN"] * 12) + [initial_parameters.get("N0") * initial_parameters.get("initial_prop_adult")]
-N_puppy_list = (["NaN"] * 12) + [initial_parameters.get("N0") * (1 - initial_parameters.get("initial_prop_adult"))]
+N_adult_list = (["NaN"] * 11) + ([round(initial_parameters.get("N0") * initial_parameters.get("initial_prop_adult"))] * 2)
+N_puppy_list = (["NaN"] * 11) + ([round(initial_parameters.get("N0") * (1 - initial_parameters.get("initial_prop_adult")))] * 2)
 monthly_births_list = births_previous_12
 monthly_deaths_list = [0] * 13
 t_list = t_previous_12
-prop_adult_list = (["NaN"] * 12) + [initial_parameters.get("initial_prop_adult")]
+prop_adult_list = ([1] * 12) + [initial_parameters.get("initial_prop_adult")]
 
 #print("t_list", t_list)
 #print("N", N_total_list)
@@ -241,7 +259,8 @@ prop_adult_list = (["NaN"] * 12) + [initial_parameters.get("initial_prop_adult")
 for i in range(12, initial_parameters.get("desired_t")+13):
 
     # Define initial variables
-    t = 1
+    if i == 12:
+        t = 0
     n_s = initial_parameters.get("n_s")
     k = initial_parameters.get("k")
     p_f = initial_parameters.get("p_f")
@@ -257,8 +276,7 @@ for i in range(12, initial_parameters.get("desired_t")+13):
                             prop_adult_start=prop_adult_list[i-2], S_total_start=S_total_list[i-2])
 
     # Calculate number of deaths
-    deaths = monthly_deaths(N_total_start=N_total_list[i-1], prop_adult_start=prop_adult_list[i-1], s_a_month=s_a,
-                            lifespan=lifespan)
+    deaths = monthly_deaths(N_total_start=N_total_list[i-1], prop_adult_start=prop_adult_list[i-1], s_a_month=s_a)
 
     # Calculate net migration
     net_migration_in = monthly_net_migration_in(N_total_start=N_total_list[i-1], m_net_in=m_net_in)
@@ -282,14 +300,14 @@ for i in range(12, initial_parameters.get("desired_t")+13):
                                    net_migration_in=net_migration_in, prop_adult_start=prop_adult_list[i-1])
 
     # Update lists with this month's values
-    N_total_list.append(new_N_total)
-    S_total_list.append(new_S_total)
-    ster_prop_list.append(new_S_total/new_N_total)
-    N_adult_list.append(num_adults)
-    N_puppy_list.append(num_puppies)
-    monthly_births_list.append(births)
-    monthly_deaths_list.append(deaths)
-    prop_adult_list.append(num_adults/new_N_total)
+    N_total_list.append(round(new_N_total))
+    S_total_list.append(round(new_S_total))
+    ster_prop_list.append(round(new_S_total/new_N_total, 2))
+    N_adult_list.append(round(num_adults))
+    N_puppy_list.append(round(num_puppies))
+    monthly_births_list.append(round(births))
+    monthly_deaths_list.append(round(deaths))
+    prop_adult_list.append(round(num_adults/new_N_total, 2))
     t_list.append(t)
 
     # Update month counter
@@ -304,3 +322,5 @@ print(N_puppy_list)
 print(monthly_births_list)
 print(monthly_deaths_list)
 print(prop_adult_list)
+
+graph_results(t_list=t_list[12:], N_list=N_total_list[12:], adult_list=N_adult_list[12:], puppy_list=N_puppy_list[12:])
