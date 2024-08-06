@@ -228,8 +228,8 @@ births_previous_12 = list(reversed(births_previous_12))
 # Now want to fill these lists with our 12 months previous data
 # Lists to store data we want to keep track of
 N_total_list = N_previous_12
-S_total_list = ([0] * 12) + [initial_parameters.get("N0") * initial_parameters.get("initial_ster_prop")]
-ster_prop_list = ([0] * 12) + [initial_parameters.get("initial_ster_prop")] # Note we are currently saying equally likely for adult and puppy to get sterilised
+S_total_list = ([0] * 11) + [(initial_parameters.get("N0") * initial_parameters.get("initial_ster_prop")) * 2]
+ster_prop_list = ([0] * 11) + [(initial_parameters.get("initial_ster_prop")) * 2] # Note we are currently saying equally likely for adult and puppy to get sterilised
 N_adult_list = (["NaN"] * 11) + ([round(initial_parameters.get("N0") * initial_parameters.get("initial_prop_adult"))] * 2)
 N_puppy_list = (["NaN"] * 11) + ([round(initial_parameters.get("N0") * (1 - initial_parameters.get("initial_prop_adult")))] * 2)
 monthly_births_list = births_previous_12
@@ -260,7 +260,7 @@ for i in range(12, initial_parameters.get("desired_t")+13):
 
     # Define initial variables
     if i == 12:
-        t = 0
+        t = 1
     n_s = initial_parameters.get("n_s")
     k = initial_parameters.get("k")
     p_f = initial_parameters.get("p_f")
