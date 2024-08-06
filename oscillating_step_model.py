@@ -3,7 +3,7 @@
 # incorporate the two-month gestation period for dogs before puppies are born
 
 # This file will follow the same steps as oscillating_model.py but with the step model instead
-
+import numpy as np
 
 ### Functions
 
@@ -80,7 +80,7 @@ def runge_kutta(**kwargs):
     # Initialize variables from dictionary
     t = kwargs.get("t0")  # initial time
     N_t = kwargs.get("N0")  # initial value of N
-    desired_t = kwargs.get("desired_t")  # target
+    desired_t = 13
     h = kwargs.get("h")  # chosen step size
     k = kwargs.get("k")
     p_a = kwargs.get("p_a")
@@ -145,26 +145,12 @@ model_iterations = []
 initial_parameters = {
     "t0": 0,
     "N0": None,
-    "initial_S_N": None,
-    "desired_S_N": None,
-    "lower_S_N": None,
-    "upper_S_N": None,
+    "initial_ster_prop": None,
+    "desired_ster_prop": None,
+    "lower_ster_prop": None,
+    "upper_ster_prop": None,
+    "initial_prop_adult": None,
     "n_s": 0,
-    "desired_t": None,
-    "h": 1,
-    "k": 100000,
-    "p_f": None,
-    "s_a": 1,
-    "s_i": 0.4,
-    "l": None,
-    "r_r": 2,
-    "m": 0,
-    "lifespan": None
-}
-
-reverse_parameters = {
-    "t0": 0,
-    "N0": None,
     "desired_t": None,
     "h": 1,
     "k": 100000,
@@ -174,7 +160,8 @@ reverse_parameters = {
     "s_i": 0.4,
     "l": None,
     "r_r": 2,
-    "m": 0
+    "m": 0,
+    "lifespan": None
 }
 
 # Test variables
@@ -197,24 +184,25 @@ reverse_parameters = {
 
 # Calculate monthly population from t=-12 up to t=0
 # Set initial variables for reverse process
-reverse_parameters["N0"] = 1000
-reverse_parameters["desired_t"] = 13
-reverse_parameters["p_f"] = 0.5
-reverse_parameters["s_i"] = 0.4
-reverse_parameters["lifespan"] = 72
-reverse_parameters["p_a"] = 1
-reverse_parameters["l"] = 6
-reverse_parameters["r_r"] = 2
-reverse_parameters["m"] = 0
-reverse_parameters["k"] = 100000
+initial_parameters["N0"] = 1000
+initial_parameters["p_f"] = 0.5
+initial_parameters["s_i"] = 0.4
+initial_parameters["lifespan"] = 72
+initial_parameters["p_a"] = 1
+initial_parameters["l"] = 6
+initial_parameters["r_r"] = 2
+initial_parameters["m"] = 0
+initial_parameters["k"] = 100000
+initial_parameters["initial_ster_prop"] = 0.2
+initial_parameters["initial_prop_adult"] = 0.8
 
 
 t_previous_12 = [-12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0]
 
-N_previous_12 = runge_kutta(**reverse_parameters)[1]
+N_previous_12 = runge_kutta(**initial_parameters)[1]
 N_previous_12 = list(reversed(N_previous_12))
 
-births_previous_12 = runge_kutta(**reverse_parameters)[2]
+births_previous_12 = runge_kutta(**initial_parameters)[2]
 births_previous_12 = list(reversed(births_previous_12))
 
 print(t_previous_12)
@@ -225,14 +213,25 @@ print(N_previous_12)
 # Now want to fill these lists with our 12 months previous data
 # Lists to store data we want to keep track of
 N_total_list = N_previous_12
-S_total_list = [N0_total_initial * initial_ster_prop]
-ster_prop_list = [initial_ster_prop] # Note we are currently saying equally likely for adult and puppy to get sterilised
-N_adult_list = [N0_total_initial * initial_prop_adult]
-N_puppy_list = [N0_total_initial * (1 - initial_prop_adult)]
+S_total_list = ([0] * 12) + [initial_parameters.get("N0") * initial_parameters.get("initial_ster_prop")]
+ster_prop_list = ([0] * 12) + [initial_parameters.get("initial_ster_prop")] # Note we are currently saying equally likely for adult and puppy to get sterilised
+N_adult_list = (["NaN"] * 12) + [initial_parameters.get("N0") * initial_parameters.get("initial_prop_adult")]
+N_puppy_list = (["NaN"] * 12) + [initial_parameters.get("N0") * (1 - initial_parameters.get("initial_prop_adult"))]
 monthly_births_list = births_previous_12
 monthly_deaths_list = [0] * 13
 t_list = t_previous_12
-prop_adult_list = [initial_prop_adult]
+prop_adult_list = (["NaN"] * 12) + [initial_parameters.get("initial_prop_adult")]
+
+print(t_list)
+print(N_total_list)
+print(S_total_list)
+print(ster_prop_list)
+print(N_adult_list)
+print(N_puppy_list)
+print(monthly_births_list)
+print(monthly_deaths_list)
+print(prop_adult_list)
+print(1)
 
 
 ######### We have initial conditions for the model, now we want to calculate the following
