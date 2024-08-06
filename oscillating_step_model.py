@@ -67,7 +67,7 @@ def adult_population(N_adult_one_month_ago, births_t_one_year_ago, deaths_t, net
     # We need to make sure we have the correct index for t
     return N_adult_current
 
-def dN_dt_reverse_RK4(N_t, k, p_a, p_f, s_a, s_i, l, r_r, S0, m):
+def dN_dt_reverse_RK4(N_t, k, p_a, p_f, s_a, s_i, l, r_r, S0, m, t):
     dNdt = -(N_t * ((k - N_t) / k) * ((p_a * p_f * s_a * s_i * l * (r_r/12) * (1 - (S0/N_t))) - ((1 - s_a) * p_a) + m))
     return dNdt
 
@@ -85,7 +85,7 @@ def runge_kutta(**kwargs):
     k = kwargs.get("k")
     p_a = kwargs.get("p_a")
     p_f = kwargs.get("p_f")
-    s_a = kwargs.get("s_a")
+    s_a = 1 - (1 / (kwargs.get("lifespan") - 12))
     s_i = kwargs.get("s_i")
     l = kwargs.get("l")
     r_r = kwargs.get("r_r")
@@ -159,6 +159,7 @@ initial_parameters = {
     "l": None,
     "r_r": 2,
     "m": 0,
+    "lifespan": None
 }
 
 reverse_parameters = {
@@ -168,31 +169,31 @@ reverse_parameters = {
     "h": 1,
     "k": 100000,
     "p_f": None,
+    "p_a": None,
     "s_a": 1,
     "s_i": 0.4,
     "l": None,
     "r_r": 2,
-    "m": 0,
-    "p_a": None
+    "m": 0
 }
 
 # Test variables
-initial_parameters["N0"] = 1000
-initial_parameters["desired_t"] = 13
-initial_ster_prop = 0.8
-p_f = 0.5
-s_i = 0.4
-lifespan = 72 # lifespan in months
-p_lifespan = 0.24 # proportion of dogs that reach lifespan
-initial_prop_adult = 0
-l = 6
-r_r = 2
-m_net_in = 0
-k = 100000
-t0 = 0 # don't need this?
-t_duration = 5
-s_a_month = 0.99
-n_s = 0
+#initial_parameters["N0"] = 1000
+#initial_parameters["desired_t"] = 13
+#initial_ster_prop = 0.8
+#p_f = 0.5
+#s_i = 0.4
+#lifespan = 72 # lifespan in months
+#p_lifespan = 0.24 # proportion of dogs that reach lifespan
+#initial_prop_adult = 0
+#l = 6
+#r_r = 2
+#m_net_in = 0
+#k = 100000
+#t0 = 0 # don't need this?
+#t_duration = 5
+#s_a_month = 0.99
+#n_s = 0
 
 # Calculate monthly population from t=-12 up to t=0
 # Set initial variables for reverse process
@@ -206,12 +207,22 @@ reverse_parameters["l"] = 6
 reverse_parameters["r_r"] = 2
 reverse_parameters["m"] = 0
 reverse_parameters["k"] = 100000
-s_a_month = 0.99
+
 
 t_previous_12 = [-12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0]
-N_previous_12 = runge_kutta()
-#births_previous_12 =
 
+N_previous_12 = runge_kutta(**reverse_parameters)[1]
+N_previous_12 = list(reversed(N_previous_12))
+
+births_previous_12 = runge_kutta(**reverse_parameters)[2]
+births_previous_12 = list(reversed(births_previous_12))
+
+print(t_previous_12)
+print(N_previous_12)
+print(births_previous_12)
+print(N_previous_12)
+
+# Now want to fill these lists with our 12 months previous data
 # Lists to store data we want to keep track of
 N_total_list = [N0_total_initial]
 S_total_list = [N0_total_initial * initial_ster_prop]

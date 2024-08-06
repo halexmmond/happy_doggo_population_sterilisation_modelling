@@ -110,7 +110,7 @@ def graph_runge_kutta(t, N):
 ### Code
 
 # Create a dictionary to keep arguments/parameters of model in
-initial_parameters = {"t0": 0, "N0": 1000, "initial_S_N": 0, "desired_S_N": None, "lower_S_N": None,
+initial_parameters = {"t0": 0, "N0": 10000, "initial_S_N": 0, "desired_S_N": None, "lower_S_N": None,
                       "upper_S_N": None, "n_s": 0, "desired_t": 13, "h": 1, "k": 100000, "p_f": 0.5, "s_a": 1,
                       "s_i": 0.4, "l": 6, "r_r": 2, "m": 0, "p_a": 1}
 
