@@ -202,7 +202,7 @@ initial_parameters = {
 
 # Calculate monthly population from t=-12 up to t=0
 # Set initial variables for reverse process
-initial_parameters["N0"] = 1000
+initial_parameters["N0"] = 1200
 initial_parameters["p_f"] = 0.5
 initial_parameters["s_i"] = 0.4
 initial_parameters["lifespan"] = 72
@@ -210,11 +210,12 @@ initial_parameters["p_a"] = 1
 initial_parameters["l"] = 6
 initial_parameters["r_r"] = 2
 initial_parameters["m"] = 0
-initial_parameters["k"] = 2000
-initial_parameters["initial_ster_prop"] = 0.2
-initial_parameters["initial_prop_adult"] = 0.8
-initial_parameters["desired_t"] = 80
+initial_parameters["k"] = 100000
+initial_parameters["initial_ster_prop"] = 0
+initial_parameters["initial_prop_adult"] = 1
+initial_parameters["desired_t"] = 18
 initial_parameters["s_a"] = 1 - (1 / (initial_parameters.get("lifespan") - 12))
+initial_parameters["n_s"] = 0
 
 
 t_previous_12 = [-12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0]

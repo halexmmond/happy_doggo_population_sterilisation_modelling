@@ -524,10 +524,10 @@ model_iterations = []
 
 # Find initial conditions of model
 initial_parameters["N0"] = 1200
-initial_parameters["initial_S_N"] = 0.8
+initial_parameters["initial_S_N"] = 0
 initial_parameters["n_s"] = 0
-initial_parameters["desired_t"] = 18
-initial_parameters["k"] = 100000
+initial_parameters["desired_t"] = 80
+initial_parameters["k"] = 7000
 initial_parameters["p_f"] = 0.5
 initial_parameters["s_i"] = 0.4
 initial_parameters["l"] = 6
