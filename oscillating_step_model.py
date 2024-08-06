@@ -224,14 +224,14 @@ print(N_previous_12)
 
 # Now want to fill these lists with our 12 months previous data
 # Lists to store data we want to keep track of
-N_total_list = [N0_total_initial]
+N_total_list = N_previous_12
 S_total_list = [N0_total_initial * initial_ster_prop]
 ster_prop_list = [initial_ster_prop] # Note we are currently saying equally likely for adult and puppy to get sterilised
 N_adult_list = [N0_total_initial * initial_prop_adult]
 N_puppy_list = [N0_total_initial * (1 - initial_prop_adult)]
-monthly_births_list = []
-monthly_deaths_list = []
-t_list = [t0]
+monthly_births_list = births_previous_12
+monthly_deaths_list = [0] * 13
+t_list = t_previous_12
 prop_adult_list = [initial_prop_adult]
 
 
