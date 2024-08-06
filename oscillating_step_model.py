@@ -195,6 +195,8 @@ initial_parameters["m"] = 0
 initial_parameters["k"] = 100000
 initial_parameters["initial_ster_prop"] = 0.2
 initial_parameters["initial_prop_adult"] = 0.8
+initial_parameters["desired_t"] = 6
+initial_parameters["s_a"] = 1 - (1 / (initial_parameters.get("lifespan") - 12))
 
 
 t_previous_12 = [-12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0]
@@ -204,11 +206,6 @@ N_previous_12 = list(reversed(N_previous_12))
 
 births_previous_12 = runge_kutta(**initial_parameters)[2]
 births_previous_12 = list(reversed(births_previous_12))
-
-print(t_previous_12)
-print(N_previous_12)
-print(births_previous_12)
-print(N_previous_12)
 
 # Now want to fill these lists with our 12 months previous data
 # Lists to store data we want to keep track of
@@ -222,16 +219,15 @@ monthly_deaths_list = [0] * 13
 t_list = t_previous_12
 prop_adult_list = (["NaN"] * 12) + [initial_parameters.get("initial_prop_adult")]
 
-print(t_list)
-print(N_total_list)
-print(S_total_list)
-print(ster_prop_list)
-print(N_adult_list)
-print(N_puppy_list)
-print(monthly_births_list)
-print(monthly_deaths_list)
-print(prop_adult_list)
-print(1)
+#print("t_list", t_list)
+#print("N", N_total_list)
+#print("S", S_total_list)
+#print("STER", ster_prop_list)
+#print("adult", N_adult_list)
+#print("puppy", N_puppy_list)
+#print("births", monthly_births_list)
+#print("deaths", monthly_deaths_list)
+#print("propadult", prop_adult_list)
 
 
 ######### We have initial conditions for the model, now we want to calculate the following
@@ -242,36 +238,48 @@ print(1)
 # Sterilisation proportion
 
 # If we want a model that calculates the population after 5 months
-for t in range(1, t_duration+1):
+for i in range(12, initial_parameters.get("desired_t")+13):
+
+    # Define initial variables
+    t = 1
+    n_s = initial_parameters.get("n_s")
+    k = initial_parameters.get("k")
+    p_f = initial_parameters.get("p_f")
+    s_a = initial_parameters.get("s_a")
+    s_i = initial_parameters.get("s_i")
+    l = initial_parameters.get("l")
+    r_r = initial_parameters.get("r_r")
+    m_net_in = initial_parameters.get("m")
+    lifespan = initial_parameters.get("lifespan")
 
     # Calculate number of births
-    births = monthly_births(k=k, p_f=p_f, s_a_month=s_a_month, s_i=s_i, l=l, r_r=r_r, N_total_start=N_total_list[t-2],
-                            prop_adult_start=prop_adult_list[t-2], S_total_start=S_total_list[t-2])
+    births = monthly_births(k=k, p_f=p_f, s_a_month=s_a, s_i=s_i, l=l, r_r=r_r, N_total_start=N_total_list[i-2],
+                            prop_adult_start=prop_adult_list[i-2], S_total_start=S_total_list[i-2])
 
     # Calculate number of deaths
-    deaths = monthly_deaths(N_total_start=N_total_list[t-1], prop_adult_start=prop_adult_list[t-1], s_a_month=s_a_month,
+    deaths = monthly_deaths(N_total_start=N_total_list[i-1], prop_adult_start=prop_adult_list[i-1], s_a_month=s_a,
                             lifespan=lifespan)
 
     # Calculate net migration
-    net_migration_in = monthly_net_migration_in(N_total_start=N_total_list[t-1], m_net_in=m_net_in)
+    net_migration_in = monthly_net_migration_in(N_total_start=N_total_list[i-1], m_net_in=m_net_in)
 
     # Calculate population change
     dNdt = dN_dt(births=births, deaths=deaths, net_migration_in=net_migration_in)
 
     # Find new total population for this month
-    new_N_total = N_total_list[t-1] + dNdt
+    new_N_total = N_total_list[i-1] + dNdt
 
     # Calculate number of sterilised dogs
-    new_S_total = num_sterilised_dogs(ster_prop_start=ster_prop_list[t-1], S_total_start=S_total_list[t-1],
+    new_S_total = num_sterilised_dogs(ster_prop_start=ster_prop_list[i-1], S_total_start=S_total_list[i-1],
                                       n_s=n_s, monthly_deaths=deaths)
 
     # Calculate number of adults
-    num_adults = adult_population(N_adult_one_month_ago=N_adult_list[t-1], births_t_one_year_ago=monthly_births_list[t-12],
-                                  deaths_t=deaths, net_migration_in=net_migration_in, prop_adult_start=prop_adult_list[t-1])
+    num_adults = adult_population(N_adult_one_month_ago=N_adult_list[i-1], births_t_one_year_ago=monthly_births_list[i-12],
+                                  deaths_t=deaths, net_migration_in=net_migration_in, prop_adult_start=prop_adult_list[i-1])
 
     # Calculate number of puppies
-    num_puppies = puppy_population(N_puppy_one_month_ago=N_puppy_list[t-1], births_t=births, births_t_one_year_ago=monthly_births_list[t-12],
-                                   net_migration_in=net_migration_in, prop_adult_start=prop_adult_list[t-1])
+    num_puppies = puppy_population(N_puppy_one_month_ago=N_puppy_list[i-1], births_t=births, births_t_one_year_ago=monthly_births_list[i-12],
+                                   net_migration_in=net_migration_in, prop_adult_start=prop_adult_list[i-1])
 
     # Update lists with this month's values
     N_total_list.append(new_N_total)
@@ -284,6 +292,15 @@ for t in range(1, t_duration+1):
     prop_adult_list.append(num_adults/new_N_total)
     t_list.append(t)
 
+    # Update month counter
+    t += 1
+
 print(t_list)
 print(N_total_list)
 print(S_total_list)
+print(ster_prop_list)
+print(N_adult_list)
+print(N_puppy_list)
+print(monthly_births_list)
+print(monthly_deaths_list)
+print(prop_adult_list)
