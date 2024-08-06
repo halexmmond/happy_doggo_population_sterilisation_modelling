@@ -210,10 +210,10 @@ initial_parameters["p_a"] = 1
 initial_parameters["l"] = 6
 initial_parameters["r_r"] = 2
 initial_parameters["m"] = 0
-initial_parameters["k"] = 100000
+initial_parameters["k"] = 2000
 initial_parameters["initial_ster_prop"] = 0.2
 initial_parameters["initial_prop_adult"] = 0.8
-initial_parameters["desired_t"] = 6
+initial_parameters["desired_t"] = 80
 initial_parameters["s_a"] = 1 - (1 / (initial_parameters.get("lifespan") - 12))
 
 
@@ -298,6 +298,21 @@ for i in range(12, initial_parameters.get("desired_t")+13):
     # Calculate number of puppies
     num_puppies = puppy_population(N_puppy_one_month_ago=N_puppy_list[i-1], births_t=births, births_t_one_year_ago=monthly_births_list[i-12],
                                    net_migration_in=net_migration_in, prop_adult_start=prop_adult_list[i-1])
+
+    if births < 0:
+        births = 0
+
+    if deaths < 0:
+        deaths = 0
+
+    if new_N_total < 0:
+        new_N_total = 1
+
+    if num_adults < 0:
+        num_adults = 0
+
+    if num_puppies < 0:
+        num_puppies = 0
 
     # Update lists with this month's values
     N_total_list.append(round(new_N_total))
